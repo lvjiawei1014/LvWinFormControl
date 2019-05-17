@@ -32,22 +32,27 @@
             this.lvImageView1 = new WinFormControl.LvImageView();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+            this.lvImageView1.SuspendLayout();
             this.SuspendLayout();
             // 
             // lvImageView1
             // 
+            this.lvImageView1.AutoFit = false;
             this.lvImageView1.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lvImageView1.Controls.Add(this.button2);
+            this.lvImageView1.Controls.Add(this.button1);
+            this.lvImageView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lvImageView1.Image = null;
             this.lvImageView1.ImageLocation = ((System.Drawing.PointF)(resources.GetObject("lvImageView1.ImageLocation")));
             this.lvImageView1.ImageScale = 1F;
-            this.lvImageView1.Location = new System.Drawing.Point(32, 12);
+            this.lvImageView1.Location = new System.Drawing.Point(0, 0);
             this.lvImageView1.Name = "lvImageView1";
-            this.lvImageView1.Size = new System.Drawing.Size(462, 324);
+            this.lvImageView1.Size = new System.Drawing.Size(1264, 681);
             this.lvImageView1.TabIndex = 0;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(598, 61);
+            this.button1.Location = new System.Drawing.Point(12, 12);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 1;
@@ -57,7 +62,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(597, 138);
+            this.button2.Location = new System.Drawing.Point(12, 41);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 2;
@@ -69,13 +74,12 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(684, 434);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.ClientSize = new System.Drawing.Size(1264, 681);
             this.Controls.Add(this.lvImageView1);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.lvImageView1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

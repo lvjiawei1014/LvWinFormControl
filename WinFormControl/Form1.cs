@@ -22,8 +22,8 @@ namespace WinFormControl
         {
             lvImageView1.AutoFit = false;
             lvImageView1.AddElement(new Rectangle(100f, 100f, 400f, 300f));
-            image= Image.FromFile("D:\\1.jpg");
-            image2 = Image.FromFile("D:\\2.jpg");
+            image= Image.FromFile("1.jpg");
+            image2 = Image.FromFile("2.jpg");
             lvImageView1.Image = image;
         }
 
