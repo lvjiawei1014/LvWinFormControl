@@ -1,0 +1,9 @@
+E:\Project\WinFormControl\WinFormControl\bin\Debug\WinFormControl.exe
+E:\Project\WinFormControl\WinFormControl\bin\Debug\WinFormControl.pdb
+E:\Project\WinFormControl\WinFormControl\obj\Debug\WinFormControl.LvImageView.resources
+E:\Project\WinFormControl\WinFormControl\obj\Debug\WinFormControl.Properties.Resources.resources
+E:\Project\WinFormControl\WinFormControl\obj\Debug\WinFormControl.csproj.GenerateResource.Cache
+E:\Project\WinFormControl\WinFormControl\obj\Debug\WinFormControl.exe
+E:\Project\WinFormControl\WinFormControl\obj\Debug\WinFormControl.pdb
+E:\Project\WinFormControl\WinFormControl\obj\Debug\WinFormControl.Form1.resources
+E:\Project\WinFormControl\WinFormControl\obj\Debug\WinFormControl.csprojResolveAssemblyReference.cache
