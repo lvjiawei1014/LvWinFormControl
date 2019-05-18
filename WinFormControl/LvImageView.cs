@@ -22,6 +22,7 @@ namespace WinFormControl
         /// 交互元素
         /// </summary>
         private List<Element> elements;
+        private List<Element> displayElements;
         #endregion
         #region 属性
         public Image Image {
@@ -35,6 +36,7 @@ namespace WinFormControl
                 OnImageSet(ref value);
             }
         }
+        public ImageViewState State { get; set; }
         public float ImageScale { get; set; }
         public PointF ImageLocation { get { return imageLocationRectF.Location; } set { imageLocationRectF.Location = value; } }
         public bool AutoFit { get; set; }
@@ -50,6 +52,7 @@ namespace WinFormControl
 
 
             elements = new List<Element>();
+            State = ImageViewState.Normal;
 
             InitializeComponent();
 
@@ -91,14 +94,14 @@ namespace WinFormControl
 
         }
         #endregion
-
+        #region 核心逻辑
         private void OnImageSet(ref Image image)
         {
             if(image!=null)
             {
                 if(AutoFit)
                 {
-                    this.ImageScale = Math.Min((float)image.Height / this.Height, (float)image.Width / this.Width);
+                    this.ImageScale = Math.Min(this.Height/(float)image.Height, this.Width/(float)image.Width);
                     this.imageLocationRectF.X = Math.Max(0, (this.Width - image.Width * ImageScale) / 2);
                     this.imageLocationRectF.Y = Math.Max(0, (this.Height - image.Height * ImageScale) / 2);
                     this.imageLocationRectF.Width = image.Width*ImageScale;
@@ -106,7 +109,7 @@ namespace WinFormControl
                 }
                 else
                 {
-                    this.ImageScale = Math.Min((float)imageLocationRectF.Height / this.Height, (float)imageLocationRectF.Width / this.Width);
+                    this.ImageScale = Math.Min((float)imageLocationRectF.Height / image.Height, (float)imageLocationRectF.Width / image.Width);
                 }
                 
                 this.Refresh();
@@ -137,23 +140,34 @@ namespace WinFormControl
         {
             this.elements.Add(element);
         }
-
-
+        #endregion
         #region 绘制
         private void PaintRect(Rectangle rect,ref Graphics g,ref Pen p)
         {
             PointF loca=this.ImageLocationToControl(rect.Location);
             g.DrawRectangle(p, loca.X, loca.Y, rect.Width * ImageScale, rect.Height * ImageScale);
         }
+        private void PaintEllipse(ref Graphics g,ref Pen p)
+        {
+            
+        }
+        /// <summary>
+        /// 绘制拖拽点
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="pen"></param>
+        /// <param name="tractionPoint"></param>
+        private void  PaintElement(ref Graphics g,ref Pen pen,ref TractionPoint tractionPoint)
+        {
+            PointF loca = this.ImageLocationToControl(tractionPoint.Location);
+            g.FillRectangle(Brushes.Black, tractionPoint.X - tractionPoint.Size / 2, tractionPoint.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
+            g.DrawRectangle(Pens.White, tractionPoint.X - tractionPoint.Size / 2, tractionPoint.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
+
+        }
         #endregion
-
-
         #region
 
         #endregion
-
-
-
         #region 辅助方法
         private PointF ControlLocationToImage(PointF p)
         {
@@ -171,5 +185,12 @@ namespace WinFormControl
         }
         #endregion
 
+    }
+
+    public enum ImageViewState
+    {
+        Normal=0,
+        Edit=1,
+        Draw=2,
     }
 }
