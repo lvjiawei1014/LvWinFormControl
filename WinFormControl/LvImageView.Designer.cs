@@ -32,9 +32,12 @@
             // 
             // LvImageView
             // 
-            this.Name = "LvImageView";
             this.Size = new System.Drawing.Size(481, 314);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.LvImageView_Paint);
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.LvImageView_MouseClick);
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.LvImageView_MouseDown);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.LvImageView_MouseMove);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.LvImageView_MouseUp);
             this.ResumeLayout(false);
 
         }

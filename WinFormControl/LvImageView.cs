@@ -14,6 +14,7 @@ namespace WinFormControl
         #region 静态成员
         private static float MaxScale = 10f;
         private static float MinScale = 0.1f;
+
         #endregion
         #region 成员变量
         private Image image = null;
@@ -22,7 +23,13 @@ namespace WinFormControl
         /// 交互元素
         /// </summary>
         private List<Element> elements;
-        private List<Element> displayElements;
+        private List<Element> baseElements;
+        private Element operatedElement;
+
+        private MouseState mouseState;
+
+        private Point operationStartControlPoint;
+        private PointF operationStartImagePoint;
         #endregion
         #region 属性
         public Image Image {
@@ -52,7 +59,9 @@ namespace WinFormControl
 
 
             elements = new List<Element>();
+            baseElements = new List<Element>();
             State = ImageViewState.Normal;
+            mouseState = MouseState.Idle;
 
             InitializeComponent();
 
@@ -67,7 +76,7 @@ namespace WinFormControl
         void LvImageView_MouseWheel(object sender, MouseEventArgs e)
         {
             System.Console.WriteLine(e.Delta+"  "+e.Location);
-            this.OnScale(e.Location, this.ImageScale * (e.Delta > 0 ? 0.9f : 1.1f));
+            this.OnScale(e.Location, this.ImageScale * (e.Delta > 0 ? 0.8f : 1.25f));
         }
 
         /// <summary>
@@ -87,7 +96,7 @@ namespace WinFormControl
                     if (element is Rectangle)
                     {
                         Rectangle rect =element as Rectangle;
-                        this.PaintRect(rect, ref g, ref p);
+                        PaintElement( g,  p,  rect);
                     }
                 }
             }
@@ -140,16 +149,57 @@ namespace WinFormControl
         {
             this.elements.Add(element);
         }
+        public void AddRectangle(Rectangle rect)
+        {
+            AddElement(rect);
+            baseElements.Add(rect.leftTopPoint);
+            baseElements.Add(rect.leftBottomPoint);
+            baseElements.Add(rect.rightTopPoint);
+            baseElements.Add(rect.rightBottomPoint);
+
+            baseElements.Sort();
+        }
+        public Element GetTargetElement(float x, float y)
+        {
+
+            for (int i = 0; i < baseElements.Count;i++ )
+            {
+                if (baseElements[i].IsIn(x, y))
+                {
+                    return baseElements[i];
+                }
+            }
+            return null;
+        }
+
+        public void AbsoluteMove(PointF  p)
+        {
+            this.imageLocationRectF.Location = p;
+        }
+        /// <summary>
+        /// 不宜在mouse move事件中使用
+        /// </summary>
+        /// <param name="p"></param>
+        public void RelativeMove(PointF p)
+        {
+            this.imageLocationRectF.X += p.X;
+            this.imageLocationRectF.Y += p.Y;
+            //System.Console.WriteLine("p:" + p.X + "  " + p.Y);
+        }
+
+
         #endregion
         #region 绘制
-        private void PaintRect(Rectangle rect,ref Graphics g,ref Pen p)
+
+        private void PaintElement(Graphics g,Pen pen,Rectangle rect)
         {
-            PointF loca=this.ImageLocationToControl(rect.Location);
-            g.DrawRectangle(p, loca.X, loca.Y, rect.Width * ImageScale, rect.Height * ImageScale);
-        }
-        private void PaintEllipse(ref Graphics g,ref Pen p)
-        {
-            
+            PointF loca = this.ImageLocationToControl(rect.Location);
+            g.DrawRectangle(pen, loca.X, loca.Y, rect.Width * ImageScale, rect.Height * ImageScale);
+            PaintElement( g,  pen,  rect.leftTopPoint);
+            PaintElement( g,  pen,  rect.leftBottomPoint);
+            PaintElement( g,  pen,  rect.rightBottomPoint);
+            PaintElement( g,  pen,  rect.rightTopPoint);
+
         }
         /// <summary>
         /// 绘制拖拽点
@@ -157,12 +207,11 @@ namespace WinFormControl
         /// <param name="g"></param>
         /// <param name="pen"></param>
         /// <param name="tractionPoint"></param>
-        private void  PaintElement(ref Graphics g,ref Pen pen,ref TractionPoint tractionPoint)
+        private void  PaintElement(Graphics g,Pen pen,TractionPoint tractionPoint)
         {
             PointF loca = this.ImageLocationToControl(tractionPoint.Location);
-            g.FillRectangle(Brushes.Black, tractionPoint.X - tractionPoint.Size / 2, tractionPoint.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
-            g.DrawRectangle(Pens.White, tractionPoint.X - tractionPoint.Size / 2, tractionPoint.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
-
+            g.FillRectangle(Brushes.Black, loca.X - tractionPoint.Size / 2, loca.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
+            g.DrawRectangle(Pens.White, loca.X - tractionPoint.Size / 2, loca.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
         }
         #endregion
         #region
@@ -176,6 +225,14 @@ namespace WinFormControl
             point.Y = (float)(p.Y - imageLocationRectF.Y) / ImageScale;
             return point;
         }
+        private PointF ControlLocationToImage(Point p)
+        {
+            PointF point = new PointF();
+            point.X = (float)((float)p.X - imageLocationRectF.X) / ImageScale;
+            point.Y = (float)((float)p.Y - imageLocationRectF.Y) / ImageScale;
+            return point;
+        }
+
         private PointF ImageLocationToControl(PointF p)
         {
             Point point = new Point();
@@ -185,6 +242,47 @@ namespace WinFormControl
         }
         #endregion
 
+        private void LvImageView_MouseClick(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void LvImageView_MouseMove(object sender, MouseEventArgs e)
+        {
+            PointF p=ControlLocationToImage(e.Location);
+            //System.Console.WriteLine("p:" + p.X + "  " + p.Y);
+            if (mouseState == MouseState.Operating)
+            {
+                if (operatedElement != null)
+                {
+                    operatedElement.Move(ControlLocationToImage(e.Location));
+                }
+                else
+                {
+                    AbsoluteMove(new PointF(e.X - operationStartImagePoint.X * ImageScale, e.Y - operationStartImagePoint.Y * ImageScale));
+                    
+                }
+                this.Refresh();
+            }
+
+        }
+
+        private void LvImageView_MouseDown(object sender, MouseEventArgs e)
+        {
+            PointF p = ControlLocationToImage(new PointF(e.X, e.Y));
+            this.operatedElement = this.GetTargetElement(p.X, p.Y);
+            this.mouseState = MouseState.Operating;
+            this.operationStartControlPoint = e.Location;
+            this.operationStartImagePoint = ControlLocationToImage(e.Location);
+            System.Console.WriteLine("operationStartImagePoint:" + operationStartImagePoint.X + "  " + operationStartImagePoint.Y);
+        }
+
+        private void LvImageView_MouseUp(object sender, MouseEventArgs e)
+        {
+            mouseState = MouseState.Idle;
+            operatedElement = null;
+        }
+
     }
 
     public enum ImageViewState
@@ -192,5 +290,11 @@ namespace WinFormControl
         Normal=0,
         Edit=1,
         Draw=2,
+    }
+
+    public enum MouseState
+    {
+        Idle=0,
+        Operating=1,
     }
 }
