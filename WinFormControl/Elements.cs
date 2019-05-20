@@ -8,18 +8,32 @@ namespace WinFormControl
 {
     public abstract class Element:IComparable<Element>
     {
-        //private PointF location = new PointF(0f, 0f);
-        protected float x, y, z;
+        
+        /// <summary>
+        /// 元素坐标系
+        /// </summary>
+        public Coordinate coordinate=new Coordinate();
+        public CoordinateType CoordinateType { get; set; }
         public string Name { get; set; }
-        public float X { get { return x; } set { x = value; } }
-        public float Y { get { return y; } set { y = value; } }
-        public float Z { get { return z; } set { z = value; } }
+        public float X { get { return coordinate.X; } set { coordinate.X = value; } }
+        public float Y { get { return coordinate.Y; } set { coordinate.Y = value; } }
+        public float Z { get { return coordinate.Z; } set { coordinate.Z = value; } }
+        public float Width { get { return coordinate.Width; } set { coordinate.Width = value; } }
+        public float Height { get { return coordinate.Height; } set { coordinate.Height = value; } }
         public PointF Location
         {
-            get { return new PointF(X, Y); }
+            get { return coordinate.Location; }
             set { this.X = value.X; this.Y = value.Y; }
         }
+        public float Scale { get { return coordinate.Scale; } set { coordinate.Scale = value; } }
+        /// <summary>
+        /// 父元素
+        /// </summary>
         public Element ParentElement{get;set;}
+        public Coordinate ParentCoordinate { get; set; }
+        /// <summary>
+        /// 可见性
+        /// </summary>
         public bool Visible{get;set;}
 
         public virtual bool IsIn(float x, float y)
@@ -54,14 +68,28 @@ namespace WinFormControl
     {
         public const float RECTANGLE_DEFAULT_Z = 2f;
 
-        private float height = 100, width = 100;
+        public new float X { get { return base.X; } set { base.X = value; OnRectChange(); } }
+        public new float Y { get { return base.Y; } set { base.Y = value; OnRectChange(); } }
 
-        public float X { get { return x; } set { x = value; OnRectChange(); } }
-        public float Y { get { return y; } set { y = value; OnRectChange(); } }
+        public new float Width { get { return base.Width; } set { base.Width = value; OnRectChange(); } }
 
-        public float Width { get { return width; } set { width = value; OnRectChange(); } }
+        public new float Height { get { return base.Height; } set { base.Height = value; OnRectChange(); } }
 
-        public float Height { get { return height; } set { height = value; OnRectChange(); } }
+        public new Coordinate ParentCoordinate 
+        { 
+            get 
+            {
+                return base.ParentCoordinate;
+            }
+            set
+            {
+                base.ParentCoordinate = value;
+                leftTopPoint.ParentCoordinate = value;
+                leftBottomPoint.ParentCoordinate = value;
+                rightBottomPoint.ParentCoordinate = value;
+                rightTopPoint.ParentCoordinate = value;
+            } 
+        }
 
         public TractionPoint leftTopPoint,leftBottomPoint,rightTopPoint,rightBottomPoint;
 
@@ -70,16 +98,16 @@ namespace WinFormControl
 
         public Rectangle(float x, float y, float width, float height)
         {
-            this.x = x;
-            this.y = y;
-            this.z = RECTANGLE_DEFAULT_Z;
-            this.width = width;
-            this.width = height;
+            this.leftTopPoint = new TractionPoint(this);
+            this.leftBottomPoint = new TractionPoint(this);
+            this.rightTopPoint = new TractionPoint(this);
+            this.rightBottomPoint = new TractionPoint(this);
 
-            this.leftBottomPoint = new TractionPoint(X, Y+Height,this);
-            this.leftTopPoint = new TractionPoint(X, Y,this);
-            this.rightBottomPoint = new TractionPoint(X + Width, Y + Height,this);
-            this.rightTopPoint = new TractionPoint(X + Width, Y,this);
+            this.X = x;
+            Y = y;
+            Z = RECTANGLE_DEFAULT_Z;
+            this.Width = width;
+            this.Height = height;
 
             this.leftTopPoint.OnTractionEventHandler += OnLeftTopPointTraction;
             this.leftBottomPoint.OnTractionEventHandler += OnLeftBottomPointTraction;
@@ -141,11 +169,10 @@ namespace WinFormControl
 
 
 
-        public TractionPoint(float x,float y)
+        public TractionPoint(Element parent)
         {
+            ParentElement = parent;
             this.Size = 6f;
-            this.X = x;
-            this.Y = y;
         }
         /// <summary>
         /// 构造
@@ -195,12 +222,95 @@ namespace WinFormControl
 
         public override bool IsIn(float x, float y)
         {
-            bool b  = Math.Abs(this.X - x) < this.Size / 2 && Math.Abs(this.Y - y) < this.Size / 2;
+            bool b  = Math.Abs(this.X - x)*ParentCoordinate.Scale < this.Size / 2 && Math.Abs(this.Y - y)*ParentCoordinate.Scale < this.Size / 2;
             return b;
         }
 
-        
+    }
+
+    public class ImageElement:Element
+    {
+        private Image image;
+
+        public int WindowWidth { get; set; }
+        public int WindowHeight { get; set; }
+        public Image Image 
+        { 
+            get { return image; }
+
+            set { this.image = value; this.Width = (Image == null) ? 0 : image.Width; this.Height = (Image == null) ? 0 : image.Height; }
+        }
+        //public float ImageScale { get { return imageScale; } set { imageScale = value; } }
+
+        public void FitToWindow(int w,int h)
+        {
+            this.Scale = Math.Min(h / (float)image.Height, w / (float)image.Width);
+            this.X = Math.Max(0, (w - image.Width *this.Scale) / 2);
+            this.Y = Math.Max(0, (h - image.Height * this.Scale) / 2);
+        }
+
+        public void ScaleImage(Point anchor,float scale)
+        {
+            PointF imageAnchor = Coordinate.CoordinateTransport(anchor, Coordinate.BaseCoornidate, this.coordinate);
+            this.X = anchor.X - scale * imageAnchor.X;
+            this.Y = anchor.Y - scale * imageAnchor.Y;
+            this.Scale = scale;
+        }
 
 
+
+    }
+    public enum CoordinateType
+    {
+        Base=0,
+        Image=1,
+    }
+
+    /// <summary>
+    /// 坐标系和尺寸
+    /// </summary>
+    public class Coordinate
+    {
+
+        /// <summary>
+        /// 基本几何参数
+        /// </summary>
+        private float x, y, z, width, height,scale;
+        public float X { get { return x; } set { x = value; } }
+        public float Y { get { return y; } set { y = value; } }
+        public float Z { get { return z; } set { z = value; } }
+        public float Width { get { return width; } set { width = value; } }
+        public float Height { get { return height; } set { height = value; } }
+        public PointF Location
+        {
+            get { return new PointF(X, Y); }
+            set { this.X = value.X; this.Y = value.Y; }
+        }
+        public float Scale { get { return scale; } set { scale = value; } }
+        public Coordinate(float x, float y, float scale)
+        {
+            Location = new PointF(x, y);
+            Scale = scale;
+        }
+        public Coordinate(PointF location, float scale)
+        {
+            Location = location;
+            Scale = scale;
+        }
+        public Coordinate()
+        {
+            Location = new PointF(0f,0f);
+            Scale = 1f;
+        }
+
+        public static Coordinate BaseCoornidate=new Coordinate(0f,0f,1f);
+
+        public static PointF CoordinateTransport(PointF p,Coordinate src,Coordinate dst)
+        {
+            PointF point = new PointF();
+            point.X = (src.Location.X + p.X * src.Scale - dst.Location.X) / dst.Scale;
+            point.Y = (src.Location.Y + p.Y * src.Scale - dst.Location.Y) / dst.Scale;
+            return point;
+        }
     }
 }

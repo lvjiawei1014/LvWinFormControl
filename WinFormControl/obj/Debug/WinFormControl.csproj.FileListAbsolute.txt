@@ -16,3 +16,12 @@ E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.LvImageView.r
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.Properties.Resources.resources
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csproj.GenerateResource.Cache
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csprojResolveAssemblyReference.cache
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.exe
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.pdb
+E:\Project\GitHub\LvWinFormControl\WinFormControl\bin\Debug\WinFormControl.exe
+E:\Project\GitHub\LvWinFormControl\WinFormControl\bin\Debug\WinFormControl.pdb
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csprojResolveAssemblyReference.cache
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.Form1.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.LvImageView.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.Properties.Resources.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csproj.GenerateResource.Cache
