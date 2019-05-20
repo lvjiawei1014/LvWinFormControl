@@ -25,8 +25,8 @@ namespace WinFormControl
         private List<Element> elements;
         private List<Element> baseElements;
         private Element operatedElement;
-
-        private MouseState mouseState;
+        private Element drawingElement;
+        private Element selectedElement;
 
         private Point operationStartControlPoint;
         private PointF operationStartImagePoint;
@@ -43,11 +43,17 @@ namespace WinFormControl
                 OnImageSet(ref value);
             }
         }
-        public ImageViewState State { get; set; }
+        public ImageViewState ImageViewState { get; set; }
+        public ElementType DrawingElementType { get; set; }
+        public MouseState MouseState { get; set; }
         public float ImageScale { get { return imageElement.Scale; } set { this.imageElement.Scale = value; } }
         public PointF ImageLocation { get { return imageElement.Location; } set { imageElement.X = value.X; imageElement.Y = value.Y; } }
         public bool AutoFit { get; set; }
 
+        #endregion
+        #region 事件
+        public delegate void ElementCreateEvent(Element element);
+        public event ElementCreateEvent ElementCreateEventHandler;
         #endregion
         #region 初始化
 
@@ -60,13 +66,14 @@ namespace WinFormControl
 
             elements = new List<Element>();
             baseElements = new List<Element>();
-            State = ImageViewState.Normal;
-            mouseState = MouseState.Idle;
+            ImageViewState = ImageViewState.Normal;
+            MouseState = MouseState.Idle;
 
             InitializeComponent();
             this.imageElement = new ImageElement();
 
             this.MouseWheel += LvImageView_MouseWheel;
+            this.ElementCreateEventHandler += this.OnElementCreate;
         }
         #endregion
         #region 事件处理
@@ -86,7 +93,11 @@ namespace WinFormControl
             Graphics g = e.Graphics;
             if (imageElement != null)
             {
-                g.DrawImage(imageElement.Image, imageElement.X, imageElement.Y, imageElement.Width * imageElement.Scale, imageElement.Height * imageElement.Scale);
+                if(imageElement.Image!=null)
+                {
+                    g.DrawImage(imageElement.Image, imageElement.X, imageElement.Y, imageElement.Width * imageElement.Scale, imageElement.Height * imageElement.Scale);
+                }
+                
                 Pen p=new Pen(Color.Blue);
                 foreach (Element element in elements)
                 {
@@ -98,6 +109,11 @@ namespace WinFormControl
                 }
             }
 
+        }
+
+        private void OnElementCreate(Element element)
+        {
+            AddElement(element);
         }
         #endregion
         #region 核心逻辑
@@ -133,13 +149,17 @@ namespace WinFormControl
         }
         public void AddElement(Element element)
         {
-            this.elements.Add(element);
+            if (element is Rectangle)
+            {
+                AddRectangle(element as Rectangle);
+                return;
+            }
         }
         public void AddRectangle(Rectangle rect)
         {
             rect.ParentCoordinate = imageElement.coordinate;
             rect.ParentElement = imageElement;
-            AddElement(rect);
+            elements.Add(rect);
             baseElements.Add(rect.leftTopPoint);
             baseElements.Add(rect.leftBottomPoint);
             baseElements.Add(rect.rightTopPoint);
@@ -189,8 +209,30 @@ namespace WinFormControl
             g.FillRectangle(Brushes.Black, loca.X - tractionPoint.Size / 2, loca.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
             g.DrawRectangle(Pens.White, loca.X - tractionPoint.Size / 2, loca.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
         }
-        #endregion
+        #endregion 
         #region 鼠标绘制图形
+        public void CreateElement(ElementType type)
+        {
+            switch (type)
+            {
+                case ElementType.Image:
+                    break;
+                case ElementType.Point:
+                    break;
+                case ElementType.Line:
+                    break;
+                case ElementType.Rectangle:
+                    this.drawingElement = new Rectangle();
+                    break;
+                default:
+                    break;
+            }
+            this.drawingElement.ParentElement = this.imageElement;
+            this.drawingElement.ParentCoordinate = this.imageElement.coordinate;
+            this.MouseState = MouseState.Idle;
+            this.ImageViewState = ImageViewState.Draw;
+            this.DrawingElementType = type;
+        }
 
 
         #endregion
@@ -221,24 +263,53 @@ namespace WinFormControl
 
         private void LvImageView_MouseClick(object sender, MouseEventArgs e)
         {
-
+            if (ImageViewState == ImageViewState.Draw)//绘制模式
+            {
+                if(MouseState==MouseState.Idle)
+                {
+                    MouseState = MouseState.Operating;
+                }
+                //如果添加了最后一个点
+                if (drawingElement.AddKeyPoint(Coordinate.CoordinateTransport(e.Location, Coordinate.BaseCoornidate, drawingElement.ParentCoordinate)))
+                {
+                    MouseState = MouseState.Idle;
+                    this.ElementCreateEventHandler(drawingElement);//触发事件
+                }
+                this.Refresh();
+            }
         }
 
         private void LvImageView_MouseMove(object sender, MouseEventArgs e)
         {
             PointF p = Coordinate.CoordinateTransport(e.Location, Coordinate.BaseCoornidate, imageElement.coordinate);
-            if (mouseState == MouseState.Operating)
+            if (ImageViewState == ImageViewState.Normal)
             {
-                if (operatedElement != null)
+                if (MouseState == MouseState.Operating)
                 {
-                    operatedElement.Move(p);
+                    if (operatedElement != null)
+                    {
+                        operatedElement.Move(p);
+                    }
+                    else
+                    {
+                        AbsoluteMove(new PointF(e.X - operationStartImagePoint.X * ImageScale, e.Y - operationStartImagePoint.Y * ImageScale));
+
+                    }
+                    this.Refresh();
                 }
-                else
+                return;
+            }
+            if(ImageViewState == ImageViewState.Draw)
+            {
+                if (MouseState == MouseState.Operating)
                 {
-                    AbsoluteMove(new PointF(e.X - operationStartImagePoint.X * ImageScale, e.Y - operationStartImagePoint.Y * ImageScale));
-                    
+                    drawingElement.AdjustLastKeyPoint(p);
+                    this.Refresh();
                 }
-                this.Refresh();
+            }
+            if(ImageViewState == ImageViewState.Edit)
+            {
+
             }
 
         }
@@ -251,7 +322,7 @@ namespace WinFormControl
         {
             PointF p = Coordinate.CoordinateTransport(e.Location, Coordinate.BaseCoornidate, imageElement.coordinate);
             this.operatedElement = this.GetTargetElement(p.X, p.Y);
-            this.mouseState = MouseState.Operating;
+            this.MouseState = MouseState.Operating;
             this.operationStartControlPoint = e.Location;
             this.operationStartImagePoint = p;
             System.Console.WriteLine("operationStartImagePoint:" + operationStartImagePoint.X + "  " + operationStartImagePoint.Y);
@@ -259,7 +330,7 @@ namespace WinFormControl
 
         private void LvImageView_MouseUp(object sender, MouseEventArgs e)
         {
-            mouseState = MouseState.Idle;
+            MouseState = MouseState.Idle;
             operatedElement = null;
         }
 
@@ -276,6 +347,15 @@ namespace WinFormControl
     {
         Idle=0,
         Operating=1,
+    }
+
+    public enum ElementType
+    {
+        Image=0,
+        Point=1,
+        Line=2,
+        Rectangle=3,
+
     }
 
     

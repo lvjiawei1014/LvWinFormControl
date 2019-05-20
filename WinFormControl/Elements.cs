@@ -13,6 +13,10 @@ namespace WinFormControl
         /// 元素坐标系
         /// </summary>
         public Coordinate coordinate=new Coordinate();
+        public bool isComplete = false;
+        public static int PointAmount;
+        public int PointCount;
+        public bool IsComplete { get; set; }
         public CoordinateType CoordinateType { get; set; }
         public string Name { get; set; }
         public float X { get { return coordinate.X; } set { coordinate.X = value; } }
@@ -35,6 +39,19 @@ namespace WinFormControl
         /// 可见性
         /// </summary>
         public bool Visible{get;set;}
+
+
+
+        public virtual bool AddKeyPoint(PointF point)
+        {
+            return false;
+        }
+        public virtual void AdjustLastKeyPoint(PointF point)
+        {
+
+        }
+
+
 
         public virtual bool IsIn(float x, float y)
         {
@@ -67,7 +84,7 @@ namespace WinFormControl
     public class Rectangle:Element
     {
         public const float RECTANGLE_DEFAULT_Z = 2f;
-
+        public static int PointAmount = 2;
         public new float X { get { return base.X; } set { base.X = value; OnRectChange(); } }
         public new float Y { get { return base.Y; } set { base.Y = value; OnRectChange(); } }
 
@@ -96,6 +113,18 @@ namespace WinFormControl
         public delegate void RectChangeEvent();
         public event RectChangeEvent RectChangeEventHandler;
 
+        public Rectangle()
+            : this(0f, 0f, 1f, 1f)
+        {
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
         public Rectangle(float x, float y, float width, float height)
         {
             this.leftTopPoint = new TractionPoint(this);
@@ -163,7 +192,42 @@ namespace WinFormControl
                 rightBottomPoint.MoveBack();
             }
         }
+        public override bool AddKeyPoint(PointF point)
+        {
+            if(!this.IsComplete)
+            {
+                switch(PointCount)
+                {
+                    case 0:
+                        this.Location = point;
+                        PointCount++;
+                        break;
+                    case 1:
+                        this.Width = point.X - this.X;
+                        this.Height = point.Y - this.Y;
+                        PointCount++;
+                        break;
+                    default:
+                        break;
+                }
+                if(PointCount==Rectangle.PointAmount)
+                {
+                    isComplete = true;
+                }
+            }
+            return isComplete;
+        }
 
+        public override void AdjustLastKeyPoint(PointF point)
+        {
+            switch (PointCount)
+            {
+                case 1:
+                    this.Width = point.X - this.X;
+                    this.Height = point.Y - this.Y;
+                    break;
+            }
+        }
     }
 
     public class TractionPoint:Element

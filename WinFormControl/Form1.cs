@@ -25,6 +25,7 @@ namespace WinFormControl
             image= Image.FromFile("1.jpg");
             image2 = Image.FromFile("2.jpg");
             lvImageView1.Image = image;
+            lvImageView1.CreateElement(ElementType.Rectangle);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -36,6 +37,17 @@ namespace WinFormControl
         private void button2_Click(object sender, EventArgs e)
         {
             lvImageView1.Image = image2;
+        }
+
+        private void btnDrawRect_Click(object sender, EventArgs e)
+        {
+            lvImageView1.CreateElement(ElementType.Rectangle);
+        }
+
+        private void btnNormal_Click(object sender, EventArgs e)
+        {
+            lvImageView1.ImageViewState = ImageViewState.Normal;
+            lvImageView1.MouseState = MouseState.Idle;
         }
     }
 }
