@@ -165,7 +165,7 @@ namespace WinFormControl
         }
 
         #endregion
-        #region 绘制
+        #region GDI绘制
 
         private void PaintElement(Graphics g,Pen pen,Rectangle rect)
         {
@@ -190,7 +190,8 @@ namespace WinFormControl
             g.DrawRectangle(Pens.White, loca.X - tractionPoint.Size / 2, loca.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
         }
         #endregion
-        #region
+        #region 鼠标绘制图形
+
 
         #endregion
         #region 辅助方法

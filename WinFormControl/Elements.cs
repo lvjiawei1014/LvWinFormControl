@@ -140,16 +140,28 @@ namespace WinFormControl
         {
             this.X = x;
             this.Height = y - this.Y;
+            if (this.Height <= 0)
+            {
+                leftBottomPoint.MoveBack();
+            }
         }
         public void OnRightTopPointTraction(float x, float y)
         {
             this.Width = x - this.X;
             this.Y = y;
+            if(this.Width<=0)
+            {
+                rightTopPoint.MoveBack();
+            }
         }
         public void OnRightBottomPointTraction(float x, float y)
         {
             this.Width = x - this.X;
             this.Height = y - this.Y;
+            if (this.Width <= 0 || this.Height <= 0)
+            {
+                rightBottomPoint.MoveBack();
+            }
         }
 
     }
@@ -197,6 +209,16 @@ namespace WinFormControl
         public override void Move(PointF p)
         {
             Traction(p);
+        }
+
+        public void MoveBack()
+        {
+            this.X = previousLocation.X;
+            this.Y = previousLocation.Y;
+            if (OnTractionEventHandler != null)
+            {
+                OnTractionEventHandler(X, Y);
+            }
         }
         /// <summary>
         /// 拖拽移动点位
