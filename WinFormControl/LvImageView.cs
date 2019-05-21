@@ -26,10 +26,12 @@ namespace WinFormControl
         private List<Element> baseElements;
         private Element operatedElement;
         private Element drawingElement;
-        private Element selectedElement;
+        public Element selectedElement;
+        public Element pointedElement;
 
         private Point operationStartControlPoint;
         private PointF operationStartImagePoint;
+        private PointF targetStartImagePoint;
         #endregion
         #region 属性
         public Image Image {
@@ -43,6 +45,7 @@ namespace WinFormControl
                 OnImageSet(ref value);
             }
         }
+        public bool ShowToolBar { get { return FlToolBar.Visible; } set { FlToolBar.Visible = value; } }
         public ImageViewState ImageViewState { get; set; }
         public ElementType DrawingElementType { get; set; }
         public MouseState MouseState { get; set; }
@@ -56,13 +59,23 @@ namespace WinFormControl
         public event ElementCreateEvent ElementCreateEventHandler;
         #endregion
         #region 初始化
+        public void InitToolBar()
+        {
+            Button btnRect = new Button();
+            btnRect.Text = "Rext";
+            FlToolBar.Controls.Add(btnRect);
 
+            FlToolBar.Height = 20;
+            FlToolBar.Width = 800;
+            FlToolBar.BackColor = Color.FromArgb(160,Color.LightBlue);
+
+            this.Controls.Add(FlToolBar);
+        }
         public LvImageView()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             //SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-
 
             elements = new List<Element>();
             baseElements = new List<Element>();
@@ -70,6 +83,7 @@ namespace WinFormControl
             MouseState = MouseState.Idle;
 
             InitializeComponent();
+            InitToolBar();
             this.imageElement = new ImageElement();
 
             this.MouseWheel += LvImageView_MouseWheel;
@@ -107,6 +121,7 @@ namespace WinFormControl
                         PaintElement( g,  p,  rect);
                     }
                 }
+                PaintElement(g, p, drawingElement);
             }
 
         }
@@ -132,6 +147,29 @@ namespace WinFormControl
                 
                 this.Refresh();
             }
+        }
+
+        public void ChangeMode(ImageViewState mode)
+        {
+            if (mode != this.ImageViewState)
+            {
+                this.MouseState = MouseState.Idle;
+            }
+            this.ImageViewState = mode;
+            switch (mode)
+            {
+                case ImageViewState.Normal:
+                    this.Cursor = Cursors.Hand;
+                    break;
+                case ImageViewState.Edit:
+                    break;
+                case ImageViewState.Draw:
+                    break;
+                default:
+                    break;
+            }
+            
+
         }
 
         private void OnScale(Point mouseLocation, float scale)
@@ -160,6 +198,7 @@ namespace WinFormControl
             rect.ParentCoordinate = imageElement.coordinate;
             rect.ParentElement = imageElement;
             elements.Add(rect);
+            baseElements.Add(rect);
             baseElements.Add(rect.leftTopPoint);
             baseElements.Add(rect.leftBottomPoint);
             baseElements.Add(rect.rightTopPoint);
@@ -169,14 +208,14 @@ namespace WinFormControl
         public Element GetTargetElement(float x, float y)
         {
 
-            for (int i = 0; i < baseElements.Count;i++ )
+            for (int i = 0; i <baseElements.Count;i++ )
             {
                 if (baseElements[i].IsIn(x, y))
                 {
                     return baseElements[i];
                 }
-            }
-            return null;
+            }  
+            return imageElement;
         }
 
         public void AbsoluteMove(PointF  p)
@@ -186,16 +225,24 @@ namespace WinFormControl
 
         #endregion
         #region GDI绘制
-
+        private void PaintElement(Graphics g, Pen pen, Element element)
+        {
+            if (element is Rectangle)
+            {
+                PaintElement(g, pen, element as Rectangle);
+            }
+        }
         private void PaintElement(Graphics g,Pen pen,Rectangle rect)
         {
             PointF loca = Coordinate.CoordinateTransport(rect.Location,imageElement.coordinate, Coordinate.BaseCoornidate);
             g.DrawRectangle(pen, loca.X, loca.Y, rect.Width * ImageScale, rect.Height * ImageScale);
-            PaintElement( g,  pen,  rect.leftTopPoint);
-            PaintElement( g,  pen,  rect.leftBottomPoint);
-            PaintElement( g,  pen,  rect.rightBottomPoint);
-            PaintElement( g,  pen,  rect.rightTopPoint);
-
+            if (rect.Selected)
+            {
+                PaintElement(g, pen, rect.leftTopPoint);
+                PaintElement(g, pen, rect.leftBottomPoint);
+                PaintElement(g, pen, rect.rightBottomPoint);
+                PaintElement(g, pen, rect.rightTopPoint);
+            }
         }
         /// <summary>
         /// 绘制拖拽点
@@ -213,6 +260,10 @@ namespace WinFormControl
         #region 鼠标绘制图形
         public void CreateElement(ElementType type)
         {
+            CreateElement(type, "");
+        }
+        public void CreateElement(ElementType type, string name)
+        {
             switch (type)
             {
                 case ElementType.Image:
@@ -227,6 +278,7 @@ namespace WinFormControl
                 default:
                     break;
             }
+            this.drawingElement.Name=name;
             this.drawingElement.ParentElement = this.imageElement;
             this.drawingElement.ParentCoordinate = this.imageElement.coordinate;
             this.MouseState = MouseState.Idle;
@@ -263,32 +315,41 @@ namespace WinFormControl
 
         private void LvImageView_MouseClick(object sender, MouseEventArgs e)
         {
+            PointF p = Coordinate.CoordinateTransport(e.Location, Coordinate.BaseCoornidate, imageElement.coordinate);
             if (ImageViewState == ImageViewState.Draw)//绘制模式
             {
+                this.SelectElement(this.drawingElement);
                 if(MouseState==MouseState.Idle)
                 {
                     MouseState = MouseState.Operating;
                 }
                 //如果添加了最后一个点
-                if (drawingElement.AddKeyPoint(Coordinate.CoordinateTransport(e.Location, Coordinate.BaseCoornidate, drawingElement.ParentCoordinate)))
+                if (drawingElement.AddKeyPoint(p))
                 {
                     MouseState = MouseState.Idle;
                     this.ElementCreateEventHandler(drawingElement);//触发事件
+                    CreateElement(this.DrawingElementType);
                 }
                 this.Refresh();
+            }
+            if (ImageViewState == ImageViewState.Edit)
+            {
+                //编辑模式不处理Click
             }
         }
 
         private void LvImageView_MouseMove(object sender, MouseEventArgs e)
         {
             PointF p = Coordinate.CoordinateTransport(e.Location, Coordinate.BaseCoornidate, imageElement.coordinate);
+            Element targetElement =this.GetTargetElement(p.X, p.Y);
+            pointedElement = targetElement;
             if (ImageViewState == ImageViewState.Normal)
             {
                 if (MouseState == MouseState.Operating)
                 {
-                    if (operatedElement != null)
+                    if (operatedElement != imageElement)
                     {
-                        operatedElement.Move(p);
+                        //operatedElement.Move(p);
                     }
                     else
                     {
@@ -296,6 +357,10 @@ namespace WinFormControl
 
                     }
                     this.Refresh();
+                }
+                else
+                {
+                    //this.Cursor = targetElement.ElememtCursor;
                 }
                 return;
             }
@@ -309,7 +374,24 @@ namespace WinFormControl
             }
             if(ImageViewState == ImageViewState.Edit)
             {
+                if (MouseState == MouseState.Operating)
+                {
+                    if (operatedElement != imageElement)
+                    {
+                        operatedElement.Move(this.targetStartImagePoint.X + p.X - operationStartImagePoint.X, this.targetStartImagePoint.Y + p.Y - operationStartImagePoint.Y);
+                    }
+                    else
+                    {
+                        AbsoluteMove(new PointF(e.X - operationStartImagePoint.X * ImageScale, e.Y - operationStartImagePoint.Y * ImageScale));
 
+                    }
+                    this.Refresh();
+                }
+                else
+                {
+                    this.Cursor = targetElement.ElememtCursor;
+                }
+                return;
             }
 
         }
@@ -320,18 +402,78 @@ namespace WinFormControl
         /// <param name="e"></param>
         private void LvImageView_MouseDown(object sender, MouseEventArgs e)
         {
+
             PointF p = Coordinate.CoordinateTransport(e.Location, Coordinate.BaseCoornidate, imageElement.coordinate);
-            this.operatedElement = this.GetTargetElement(p.X, p.Y);
-            this.MouseState = MouseState.Operating;
-            this.operationStartControlPoint = e.Location;
-            this.operationStartImagePoint = p;
-            System.Console.WriteLine("operationStartImagePoint:" + operationStartImagePoint.X + "  " + operationStartImagePoint.Y);
+            Element targetElement =this.GetTargetElement(p.X, p.Y);
+            if (ImageViewState == ImageViewState.Normal)
+            {
+                if (MouseState == MouseState.Operating)
+                {
+
+                }
+                else
+                {
+
+                }
+                //图片拖动准备
+                this.operatedElement = targetElement;
+                this.MouseState = MouseState.Operating;
+                this.operationStartControlPoint = e.Location;
+                this.operationStartImagePoint = p;
+            }
+            if (ImageViewState == ImageViewState.Draw)
+            {
+                //绘图模式暂时不处理鼠标按下事件
+            } 
+            if (ImageViewState == ImageViewState.Edit)//编辑模式 确定编辑对象
+            {
+                //
+                this.operatedElement = targetElement;
+                this.MouseState = MouseState.Operating;
+                this.operationStartControlPoint = e.Location;
+                this.operationStartImagePoint = p;
+                this.targetStartImagePoint = targetElement.Location;
+                System.Console.WriteLine("operationStartImagePoint:" + operationStartImagePoint.X + "  " + operationStartImagePoint.Y);
+                this.SelectElement(operatedElement);
+            }
+            
         }
 
         private void LvImageView_MouseUp(object sender, MouseEventArgs e)
         {
-            MouseState = MouseState.Idle;
-            operatedElement = null;
+            if (ImageViewState == ImageViewState.Normal)
+            {
+                if (MouseState == MouseState.Operating)
+                {
+                    MouseState = MouseState.Idle;
+                }
+                else
+                {
+
+                }
+
+            }
+            if (ImageViewState == ImageViewState.Draw)
+            {
+
+            }
+            if (ImageViewState == ImageViewState.Edit)
+            {
+                MouseState = MouseState.Idle;
+                operatedElement = null;
+            }
+            
+        }
+
+        public void SelectElement(Element element)
+        {
+            if (this.selectedElement != null && element is MainElement)
+            {
+                this.selectedElement.Selected = false;
+            }
+            this.selectedElement = element;
+            this.selectedElement.Selected = true;
+            this.Refresh();
         }
 
     }

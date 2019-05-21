@@ -28,7 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.FlToolBar = new System.Windows.Forms.FlowLayoutPanel();
             this.SuspendLayout();
+            // 
+            // FlToolBar
+            // 
+            this.FlToolBar.AutoSize = true;
+            this.FlToolBar.Location = new System.Drawing.Point(0, 0);
+            this.FlToolBar.Name = "FlToolBar";
+            this.FlToolBar.Size = new System.Drawing.Size(200, 100);
+            this.FlToolBar.TabIndex = 0;
             // 
             // LvImageView
             // 
@@ -43,5 +52,7 @@
         }
 
         #endregion
+
+        private System.Windows.Forms.FlowLayoutPanel FlToolBar;
     }
 }

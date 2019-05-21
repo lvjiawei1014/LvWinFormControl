@@ -21,11 +21,13 @@ namespace WinFormControl
         private void Form1_Load(object sender, EventArgs e)
         {
             lvImageView1.AutoFit = true;
-            lvImageView1.AddRectangle(new Rectangle(100f, 100f, 400f, 300f));
+            Rectangle rect = new Rectangle(100f, 100f, 400f, 300f);
+            rect.Name = "rect";
+            lvImageView1.AddRectangle(rect);
             image= Image.FromFile("1.jpg");
             image2 = Image.FromFile("2.jpg");
             lvImageView1.Image = image;
-            lvImageView1.CreateElement(ElementType.Rectangle);
+            //lvImageView1.CreateElement(ElementType.Rectangle);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -46,8 +48,19 @@ namespace WinFormControl
 
         private void btnNormal_Click(object sender, EventArgs e)
         {
-            lvImageView1.ImageViewState = ImageViewState.Normal;
+            lvImageView1.ChangeMode(ImageViewState.Normal);
+        }
+
+        private void btnEdit_Click(object sender, EventArgs e)
+        {
+            lvImageView1.ImageViewState = ImageViewState.Edit;
             lvImageView1.MouseState = MouseState.Idle;
         }
+
+        private void lvImageView1_MouseMove(object sender, MouseEventArgs e)
+        {
+            this.textBox1.Text = lvImageView1.pointedElement.GetType().ToString();
+        }
+
     }
 }

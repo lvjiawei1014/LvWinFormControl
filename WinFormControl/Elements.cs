@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace WinFormControl
 {
     public abstract class Element:IComparable<Element>
     {
-        
+        private bool selected = false;
+
+        public static Cursor ElememtDefaultCursor = Cursors.Cross;
         /// <summary>
         /// 元素坐标系
         /// </summary>
@@ -16,6 +19,7 @@ namespace WinFormControl
         public bool isComplete = false;
         public static int PointAmount;
         public int PointCount;
+        public Cursor ElememtCursor = ElememtDefaultCursor;
         public bool IsComplete { get; set; }
         public CoordinateType CoordinateType { get; set; }
         public string Name { get; set; }
@@ -39,8 +43,7 @@ namespace WinFormControl
         /// 可见性
         /// </summary>
         public bool Visible{get;set;}
-
-
+        public bool Selected { get { return selected; } set { this.selected = value; BeSelect(value); } }
 
         public virtual bool AddKeyPoint(PointF point)
         {
@@ -51,7 +54,7 @@ namespace WinFormControl
 
         }
 
-
+        public abstract void BeSelect(bool b);
 
         public virtual bool IsIn(float x, float y)
         {
@@ -78,18 +81,23 @@ namespace WinFormControl
             return this.Z == other.Z ? 0 : (this.Z > other.Z ? 1 : -1);
         }
     }
+
+    public abstract class MainElement : Element
+    {
+
+    }
     /// <summary>
     /// 矩形元素
     /// </summary>
-    public class Rectangle:Element
+    public class Rectangle : MainElement
     {
+        public static Cursor ElementDefaultCursor = Cursors.SizeAll;
         public const float RECTANGLE_DEFAULT_Z = 2f;
         public static int PointAmount = 2;
         public new float X { get { return base.X; } set { base.X = value; OnRectChange(); } }
         public new float Y { get { return base.Y; } set { base.Y = value; OnRectChange(); } }
 
         public new float Width { get { return base.Width; } set { base.Width = value; OnRectChange(); } }
-
         public new float Height { get { return base.Height; } set { base.Height = value; OnRectChange(); } }
 
         public new Coordinate ParentCoordinate 
@@ -127,10 +135,16 @@ namespace WinFormControl
         /// <param name="height"></param>
         public Rectangle(float x, float y, float width, float height)
         {
+            this.ElememtCursor = Rectangle.ElementDefaultCursor;
             this.leftTopPoint = new TractionPoint(this);
             this.leftBottomPoint = new TractionPoint(this);
             this.rightTopPoint = new TractionPoint(this);
             this.rightBottomPoint = new TractionPoint(this);
+
+            this.leftTopPoint.ElememtCursor = Cursors.SizeAll;
+            this.leftBottomPoint.ElememtCursor = Cursors.SizeNESW;
+            this.rightBottomPoint.ElememtCursor = Cursors.SizeNWSE;
+            this.rightTopPoint.ElememtCursor = Cursors.SizeNESW;
 
             this.X = x;
             Y = y;
@@ -148,6 +162,17 @@ namespace WinFormControl
             ParentElement = null;
         }
 
+        /// <summary>
+        /// 基类 的Selected属性被设置时触发
+        /// </summary>
+        /// <param name="b"></param>
+        public override void BeSelect(bool b)
+        {
+            this.rightBottomPoint.Visible = b;
+            this.rightTopPoint.Visible = b;
+            this.leftBottomPoint.Visible = b;
+            this.leftTopPoint.Visible = b;
+        }
         public void OnRectChange()
         {
             this.leftTopPoint.X = X;
@@ -167,18 +192,22 @@ namespace WinFormControl
         }
         public void OnLeftBottomPointTraction(float x, float y)
         {
+            float right = this.X + this.Width;
             this.X = x;
+            this.Width = right - this.X;
             this.Height = y - this.Y;
-            if (this.Height <= 0)
+            if (this.Width <= 0 || this.Height <= 0)
             {
                 leftBottomPoint.MoveBack();
             }
         }
         public void OnRightTopPointTraction(float x, float y)
         {
+            float bottom = this.Y + this.Height;
             this.Width = x - this.X;
             this.Y = y;
-            if(this.Width<=0)
+            this.Height = bottom - this.Y;
+            if (this.Width <= 0 || this.Height <= 0)
             {
                 rightTopPoint.MoveBack();
             }
@@ -217,7 +246,6 @@ namespace WinFormControl
             }
             return isComplete;
         }
-
         public override void AdjustLastKeyPoint(PointF point)
         {
             switch (PointCount)
@@ -227,6 +255,29 @@ namespace WinFormControl
                     this.Height = point.Y - this.Y;
                     break;
             }
+        }
+        public override bool IsIn(float x, float y)
+        {
+            return (x < (X + Width) && x > X && Math.Abs(y - Y) < 6 / ParentCoordinate.Scale)
+                || (x < (X + Width) && x > X && Math.Abs(y - (Y + Height)) < 6 / ParentCoordinate.Scale)
+                || (y > Y && y < (Y + Height) && Math.Abs(x - X) < 6 / ParentCoordinate.Scale)
+                || (y > Y && y < (Y + Height) && Math.Abs(x - (X + Width)) < 6 / ParentCoordinate.Scale);
+        }
+
+        public override void Move(float x, float y)
+        {
+            base.Move(x, y);
+            OnRectChange();
+        }
+        public override void Move(PointF p)
+        {
+            base.Move(p);
+            OnRectChange();
+        }
+
+        private void SetTractionPointsVisiual(bool b)
+        {
+            leftBottomPoint.Visible = b;
         }
     }
 
@@ -265,6 +316,10 @@ namespace WinFormControl
             this.Z = parent.Z + 0.01f;
         }
 
+        public override void BeSelect(bool b)
+        {
+            
+        }
         public override void Move(float x, float y)
         {
             Traction(x, y);
@@ -281,7 +336,7 @@ namespace WinFormControl
             this.Y = previousLocation.Y;
             if (OnTractionEventHandler != null)
             {
-                OnTractionEventHandler(X, Y);
+                OnTractionEventHandler(this.X, this.Y);
             }
         }
         /// <summary>
@@ -308,13 +363,17 @@ namespace WinFormControl
 
         public override bool IsIn(float x, float y)
         {
-            bool b  = Math.Abs(this.X - x)*ParentCoordinate.Scale < this.Size / 2 && Math.Abs(this.Y - y)*ParentCoordinate.Scale < this.Size / 2;
-            return b;
+            if (this is TractionPoint)
+            {
+                bool b = Math.Abs(this.X - x) * ParentCoordinate.Scale < this.Size / 2 && Math.Abs(this.Y - y) * ParentCoordinate.Scale < this.Size / 2;
+                return b && this.Visible;
+            }
+            return false;
         }
 
     }
 
-    public class ImageElement:Element
+    public class ImageElement : MainElement
     {
         private Image image;
 
@@ -327,7 +386,10 @@ namespace WinFormControl
             set { this.image = value; this.Width = (Image == null) ? 0 : image.Width; this.Height = (Image == null) ? 0 : image.Height; }
         }
         //public float ImageScale { get { return imageScale; } set { imageScale = value; } }
+        public ImageElement()
+        {
 
+        }
         public void FitToWindow(int w,int h)
         {
             this.Scale = Math.Min(h / (float)image.Height, w / (float)image.Width);
@@ -343,7 +405,10 @@ namespace WinFormControl
             this.Scale = scale;
         }
 
-
+        public override void BeSelect(bool b)
+        {
+            
+        }
 
     }
     public enum CoordinateType

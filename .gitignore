@@ -4,3 +4,5 @@
 *.Cache
 *.pdb
 *.cache
+*.pdb
+*.cache
