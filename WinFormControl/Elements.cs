@@ -185,12 +185,12 @@ namespace WinFormControl
             this.rightBottomPoint.Y = Y + Height;
         }
 
-        public void OnLeftTopPointTraction(float x, float y)
+        public void OnLeftTopPointTraction(TractionPoint element, float x, float y)
         {
             this.X = x;
             this.Y = y;
         }
-        public void OnLeftBottomPointTraction(float x, float y)
+        public void OnLeftBottomPointTraction(TractionPoint element, float x, float y)
         {
             float right = this.X + this.Width;
             this.X = x;
@@ -201,7 +201,7 @@ namespace WinFormControl
                 leftBottomPoint.MoveBack();
             }
         }
-        public void OnRightTopPointTraction(float x, float y)
+        public void OnRightTopPointTraction(TractionPoint element, float x, float y)
         {
             float bottom = this.Y + this.Height;
             this.Width = x - this.X;
@@ -212,7 +212,7 @@ namespace WinFormControl
                 rightTopPoint.MoveBack();
             }
         }
-        public void OnRightBottomPointTraction(float x, float y)
+        public void OnRightBottomPointTraction(TractionPoint element, float x, float y)
         {
             this.Width = x - this.X;
             this.Height = y - this.Y;
@@ -275,12 +275,142 @@ namespace WinFormControl
             OnRectChange();
         }
 
-        private void SetTractionPointsVisiual(bool b)
-        {
-            leftBottomPoint.Visible = b;
-        }
     }
+    public class Line : Element
+    {
+        public static Cursor ElementDefaultCursor = Cursors.SizeAll;
+        public const float LINE_DEFAULT_Z = 2f;
+        public new static int PointAmount = 2;
+        private float x2, y2;
+        private List<TractionPoint> tractionPointList = new List<TractionPoint>();
+        public new float X { get { return base.X; } set { base.X = value; OnLineChange(null); } }
+        public new float Y { get { return base.Y; } set { base.Y = value; OnLineChange(null); } }
+        public float X2 { get { return x2; } set { this.x2 = value; OnLineChange(null); } }
+        public float Y2 { get { return y2; } set { this.y2 = value; OnLineChange(null); } }
+        public new Coordinate ParentCoordinate
+        {
+            get
+            {
+                return base.ParentCoordinate;
+            }
+            set
+            {
+                base.ParentCoordinate = value;
+                for (int i = 0; i < tractionPointList.Count; i++) { tractionPointList[i].ParentCoordinate = value; }
+            }
+        }
+        public event ElementChangeEvent LineChangeEventHandler;
 
+
+        public Line() : this(-10f, -10f, -5f, -5f) { }
+
+        public Line(float x1, float y1, float x2, float y2)
+        {
+            this.ElememtCursor = Rectangle.ElementDefaultCursor;
+
+            for (int i = 0; i < tractionPointList.Count; i++)
+            {
+                tractionPointList.Add( new TractionPoint(this));
+                tractionPointList[i].ElememtCursor = Cursors.SizeAll;
+                tractionPointList[i].Name = "tractionPoint" + i;
+                tractionPointList[i].OnTractionEventHandler += OnLinePointTraction;
+            }
+            this.X = x1;
+            this.Y = y1;
+            this.X2 = x2;
+            this.Y2 = y2;
+            this.Z = LINE_DEFAULT_Z;
+            this.Visible = true;
+            this.ParentElement = null;
+
+            LineChangeEventHandler = new ElementChangeEvent(OnLineChange);
+        }
+
+        public override void BeSelect(bool b)
+        {
+            for (int i = 0; i < tractionPointList.Count; i++)
+            {
+                tractionPointList[i].Visible = true;
+            }
+        }
+
+        public void OnLineChange(Element element)
+        {
+            tractionPointList[0].X = this.X; 
+            tractionPointList[0].Y=this.Y;
+            tractionPointList[1].X = this.X2; 
+            tractionPointList[1].Y=this.Y2;
+        }
+
+
+        public void OnLinePointTraction(TractionPoint element,float x, float y)
+        {
+            switch (element.Name)
+            {
+                case "tractionPoint0":
+                    this.X = x;
+                    this.Y = y;
+                    break;
+                case "tractionPoint1":
+                    this.X2 = x;
+                    this.Y2 = y;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        public override bool AddKeyPoint(PointF point)
+        {
+            if (!this.IsComplete)
+            {
+                switch (PointCount)
+                {
+                    case 0:
+                        this.Location = point;
+                        PointCount++;
+                        break;
+                    case 1:
+                        this.X2 = point.X;
+                        this.Y2 = point.Y;
+                        PointCount++;
+                        break;
+                    default:
+                        break;
+                }
+                if (PointCount == Line.PointAmount)
+                {
+                    isComplete = true;
+                }
+            }
+            return isComplete;
+        }
+
+        public override void AdjustLastKeyPoint(PointF point)
+        {
+            switch (PointCount)
+            {
+                case 1:
+                    this.X2 = point.X;
+                    this.Y2 = point.Y;
+                    break;
+            }
+        }
+
+        public override void Move(float x, float y)
+        {
+            base.Move(x, y);
+            OnLineChange(this);
+        }
+
+        public override void Move(PointF p)
+        {
+            base.Move(p);
+            OnLineChange(this);
+        }
+
+
+    }
     public class TractionPoint:Element
     {
 
@@ -291,7 +421,7 @@ namespace WinFormControl
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        public delegate void TractionEvent(float x, float y);
+        public delegate void TractionEvent(TractionPoint element, float x, float y);
         public event TractionEvent OnTractionEventHandler;
 
 
@@ -336,7 +466,7 @@ namespace WinFormControl
             this.Y = previousLocation.Y;
             if (OnTractionEventHandler != null)
             {
-                OnTractionEventHandler(this.X, this.Y);
+                OnTractionEventHandler(this,this.X, this.Y);
             }
         }
         /// <summary>
@@ -352,7 +482,7 @@ namespace WinFormControl
             this.Y = y;
             if(OnTractionEventHandler!=null)
             {
-                OnTractionEventHandler(x, y);
+                OnTractionEventHandler(this,x, y);
             }
         }
 
@@ -416,6 +546,10 @@ namespace WinFormControl
         Base=0,
         Image=1,
     }
+
+
+    public delegate void ElementChangeEvent(Element element);
+
 
     /// <summary>
     /// 坐标系和尺寸

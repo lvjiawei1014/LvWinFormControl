@@ -45,7 +45,6 @@ namespace WinFormControl
                 OnImageSet(ref value);
             }
         }
-        public bool ShowToolBar { get { return FlToolBar.Visible; } set { FlToolBar.Visible = value; } }
         public ImageViewState ImageViewState { get; set; }
         public ElementType DrawingElementType { get; set; }
         public MouseState MouseState { get; set; }
@@ -59,18 +58,6 @@ namespace WinFormControl
         public event ElementCreateEvent ElementCreateEventHandler;
         #endregion
         #region 初始化
-        public void InitToolBar()
-        {
-            Button btnRect = new Button();
-            btnRect.Text = "Rext";
-            FlToolBar.Controls.Add(btnRect);
-
-            FlToolBar.Height = 20;
-            FlToolBar.Width = 800;
-            FlToolBar.BackColor = Color.FromArgb(160,Color.LightBlue);
-
-            this.Controls.Add(FlToolBar);
-        }
         public LvImageView()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
@@ -83,7 +70,6 @@ namespace WinFormControl
             MouseState = MouseState.Idle;
 
             InitializeComponent();
-            InitToolBar();
             this.imageElement = new ImageElement();
 
             this.MouseWheel += LvImageView_MouseWheel;
