@@ -56,6 +56,7 @@ namespace WinFormControl
         #region 事件
         public delegate void ElementCreateEvent(Element element);
         public event ElementCreateEvent ElementCreateEventHandler;
+
         #endregion
         #region 初始化
         public LvImageView()
@@ -227,6 +228,29 @@ namespace WinFormControl
         public void AbsoluteMove(PointF  p)
         {
             this.imageElement.Location = p;
+        }
+
+
+        public void DeleteElement(Element element)
+        {
+            for (int i = 0; i < elements.Count; i++)
+            {
+                if(element==elements[i])
+                {
+                    elements.RemoveAt(i);
+                }
+            }
+
+            for (int i = 0; i < baseElements.Count; i++)
+            {
+                if (element == baseElements[i].ParentElement)
+                {
+                    baseElements.RemoveAt(i);
+                }
+            }
+
+
+            this.Refresh();
         }
 
         #endregion

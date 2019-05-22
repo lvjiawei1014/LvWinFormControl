@@ -30,13 +30,14 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.lvImageView1 = new WinFormControl.LvImageView();
+            this.btnLine = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.btnEdit = new System.Windows.Forms.Button();
             this.btnNormal = new System.Windows.Forms.Button();
             this.btnDrawRect = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.btnLine = new System.Windows.Forms.Button();
+            this.btnDelete = new System.Windows.Forms.Button();
             this.lvImageView1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -44,6 +45,7 @@
             // 
             this.lvImageView1.AutoFit = false;
             this.lvImageView1.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.lvImageView1.Controls.Add(this.btnDelete);
             this.lvImageView1.Controls.Add(this.btnLine);
             this.lvImageView1.Controls.Add(this.textBox1);
             this.lvImageView1.Controls.Add(this.btnEdit);
@@ -63,6 +65,16 @@
             this.lvImageView1.Size = new System.Drawing.Size(1264, 681);
             this.lvImageView1.TabIndex = 0;
             this.lvImageView1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.lvImageView1_MouseMove);
+            // 
+            // btnLine
+            // 
+            this.btnLine.Location = new System.Drawing.Point(12, 99);
+            this.btnLine.Name = "btnLine";
+            this.btnLine.Size = new System.Drawing.Size(75, 23);
+            this.btnLine.TabIndex = 7;
+            this.btnLine.Text = "画直线";
+            this.btnLine.UseVisualStyleBackColor = true;
+            this.btnLine.Click += new System.EventHandler(this.btnLine_Click);
             // 
             // textBox1
             // 
@@ -121,15 +133,15 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // btnLine
+            // btnDelete
             // 
-            this.btnLine.Location = new System.Drawing.Point(12, 99);
-            this.btnLine.Name = "btnLine";
-            this.btnLine.Size = new System.Drawing.Size(75, 23);
-            this.btnLine.TabIndex = 7;
-            this.btnLine.Text = "画直线";
-            this.btnLine.UseVisualStyleBackColor = true;
-            this.btnLine.Click += new System.EventHandler(this.btnLine_Click);
+            this.btnDelete.Location = new System.Drawing.Point(12, 330);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(75, 23);
+            this.btnDelete.TabIndex = 8;
+            this.btnDelete.Text = "删除";
+            this.btnDelete.UseVisualStyleBackColor = true;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
             // Form1
             // 
@@ -156,6 +168,7 @@
         private System.Windows.Forms.Button btnEdit;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button btnLine;
+        private System.Windows.Forms.Button btnDelete;
     }
 }
 

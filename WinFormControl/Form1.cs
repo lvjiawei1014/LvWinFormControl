@@ -67,5 +67,11 @@ namespace WinFormControl
             lvImageView1.CreateElement(ElementType.Line);
         }
 
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            lvImageView1.DeleteElement(lvImageView1.selectedElement);
+
+        }
+
     }
 }

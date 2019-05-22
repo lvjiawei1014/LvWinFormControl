@@ -7,10 +7,11 @@ using System.Windows.Forms;
 
 namespace WinFormControl
 {
+    [Serializable()]
     public abstract class Element:IComparable<Element>
     {
         private bool selected = false;
-
+        public string info;
         public static Cursor ElememtDefaultCursor = Cursors.Cross;
         /// <summary>
         /// 元素坐标系
@@ -95,7 +96,7 @@ namespace WinFormControl
             return this.Z == other.Z ? 0 : (this.Z > other.Z ? 1 : -1);
         }
     }
-
+    [Serializable()]
     public abstract class MainElement : Element
     {
         public MainElement() : base() { }
@@ -103,8 +104,10 @@ namespace WinFormControl
     /// <summary>
     /// 矩形元素
     /// </summary>
+    [Serializable()]
     public class Rectangle : MainElement
     {
+        public static Font DefaultFont = new Font("微软雅黑", 12f, FontStyle.Bold);
         public static Cursor ElementDefaultCursor = Cursors.SizeAll;
         public const float RECTANGLE_DEFAULT_Z = 2f;
         public new static int PointAmount = 2;
@@ -186,6 +189,7 @@ namespace WinFormControl
         {
             PointF loca = Coordinate.CoordinateTransport(this.Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
             g.DrawRectangle(p, loca.X, loca.Y, this.Width * ParentCoordinate.Scale, this.Height * ParentCoordinate.Scale);
+            g.DrawString(this.info, Rectangle.DefaultFont, Brushes.Blue, loca.X+10 , loca.Y+10);
             if (this.Selected)
             {
                 this.leftBottomPoint.Draw(g, p);
@@ -666,7 +670,7 @@ namespace WinFormControl
         }
 
     }
-
+    [Serializable()]
     public class ImageElement : MainElement
     {
         private Image image;
@@ -710,19 +714,21 @@ namespace WinFormControl
         }
 
     }
+    [Serializable()]
     public enum CoordinateType
     {
         Base=0,
         Image=1,
     }
 
-
+    [Serializable()]
     public delegate void ElementChangeEvent(Element element);
 
 
     /// <summary>
     /// 坐标系和尺寸
     /// </summary>
+    [Serializable()]
     public class Coordinate
     {
 
