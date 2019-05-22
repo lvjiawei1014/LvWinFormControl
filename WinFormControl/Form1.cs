@@ -62,5 +62,10 @@ namespace WinFormControl
             this.textBox1.Text = lvImageView1.pointedElement.GetType().ToString();
         }
 
+        private void btnLine_Click(object sender, EventArgs e)
+        {
+            lvImageView1.CreateElement(ElementType.Line);
+        }
+
     }
 }

@@ -45,11 +45,25 @@ namespace WinFormControl
         public bool Visible{get;set;}
         public bool Selected { get { return selected; } set { this.selected = value; BeSelect(value); } }
 
+
+        public ElementChangeEvent ElementChangeEventHandler;
+
+        public abstract void OnElementChange(Element element);
+
+        public Element()
+        {
+            this.ElementChangeEventHandler = new ElementChangeEvent(OnElementChange);
+        }
         public virtual bool AddKeyPoint(PointF point)
         {
             return false;
         }
         public virtual void AdjustLastKeyPoint(PointF point)
+        {
+
+        }
+
+        public virtual void Draw(Graphics g, Pen p)
         {
 
         }
@@ -84,7 +98,7 @@ namespace WinFormControl
 
     public abstract class MainElement : Element
     {
-
+        public MainElement() : base() { }
     }
     /// <summary>
     /// 矩形元素
@@ -93,12 +107,12 @@ namespace WinFormControl
     {
         public static Cursor ElementDefaultCursor = Cursors.SizeAll;
         public const float RECTANGLE_DEFAULT_Z = 2f;
-        public static int PointAmount = 2;
-        public new float X { get { return base.X; } set { base.X = value; OnRectChange(); } }
-        public new float Y { get { return base.Y; } set { base.Y = value; OnRectChange(); } }
+        public new static int PointAmount = 2;
+        public new float X { get { return base.X; } set { base.X = value; OnElementChange(null); } }
+        public new float Y { get { return base.Y; } set { base.Y = value; OnElementChange(null); } }
 
-        public new float Width { get { return base.Width; } set { base.Width = value; OnRectChange(); } }
-        public new float Height { get { return base.Height; } set { base.Height = value; OnRectChange(); } }
+        public new float Width { get { return base.Width; } set { base.Width = value; OnElementChange(null); } }
+        public new float Height { get { return base.Height; } set { base.Height = value; OnElementChange(null); } }
 
         public new Coordinate ParentCoordinate 
         { 
@@ -118,9 +132,6 @@ namespace WinFormControl
 
         public TractionPoint leftTopPoint,leftBottomPoint,rightTopPoint,rightBottomPoint;
 
-        public delegate void RectChangeEvent();
-        public event RectChangeEvent RectChangeEventHandler;
-
         public Rectangle()
             : this(0f, 0f, 1f, 1f)
         {
@@ -133,7 +144,7 @@ namespace WinFormControl
         /// <param name="y"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        public Rectangle(float x, float y, float width, float height)
+        public Rectangle(float x, float y, float width, float height):base()
         {
             this.ElememtCursor = Rectangle.ElementDefaultCursor;
             this.leftTopPoint = new TractionPoint(this);
@@ -156,10 +167,32 @@ namespace WinFormControl
             this.leftBottomPoint.OnTractionEventHandler += OnLeftBottomPointTraction;
             this.rightTopPoint.OnTractionEventHandler += OnRightTopPointTraction;
             this.rightBottomPoint.OnTractionEventHandler += OnRightBottomPointTraction;
-
-            RectChangeEventHandler = new RectChangeEvent(OnRectChange);
             Visible = true;
             ParentElement = null;
+        }
+        public override void OnElementChange(Element element)
+        {
+            this.leftTopPoint.X = X;
+            this.leftTopPoint.Y = Y;
+            this.leftBottomPoint.X = X;
+            this.leftBottomPoint.Y = Y + Height;
+            this.rightTopPoint.X = X + Width;
+            this.rightTopPoint.Y = Y;
+            this.rightBottomPoint.X = X + Width;
+            this.rightBottomPoint.Y = Y + Height;
+        }
+
+        public override void Draw(Graphics g, Pen p)
+        {
+            PointF loca = Coordinate.CoordinateTransport(this.Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
+            g.DrawRectangle(p, loca.X, loca.Y, this.Width * ParentCoordinate.Scale, this.Height * ParentCoordinate.Scale);
+            if (this.Selected)
+            {
+                this.leftBottomPoint.Draw(g, p);
+                this.leftTopPoint.Draw(g, p);
+                this.rightBottomPoint.Draw(g, p);
+                this.rightTopPoint.Draw(g, p);
+            }
         }
 
         /// <summary>
@@ -173,18 +206,6 @@ namespace WinFormControl
             this.leftBottomPoint.Visible = b;
             this.leftTopPoint.Visible = b;
         }
-        public void OnRectChange()
-        {
-            this.leftTopPoint.X = X;
-            this.leftTopPoint.Y = Y;
-            this.leftBottomPoint.X = X;
-            this.leftBottomPoint.Y = Y + Height;
-            this.rightTopPoint.X = X + Width;
-            this.rightTopPoint.Y = Y;
-            this.rightBottomPoint.X = X + Width;
-            this.rightBottomPoint.Y = Y + Height;
-        }
-
         public void OnLeftTopPointTraction(TractionPoint element, float x, float y)
         {
             this.X = x;
@@ -267,26 +288,30 @@ namespace WinFormControl
         public override void Move(float x, float y)
         {
             base.Move(x, y);
-            OnRectChange();
+            OnElementChange(this);
         }
         public override void Move(PointF p)
         {
             base.Move(p);
-            OnRectChange();
+            OnElementChange(this);
         }
 
     }
-    public class Line : Element
+    public class Line : MainElement
     {
         public static Cursor ElementDefaultCursor = Cursors.SizeAll;
         public const float LINE_DEFAULT_Z = 2f;
-        public new static int PointAmount = 2;
+        public new static int PointAmount = 2;//关键点数量
         private float x2, y2;
         private List<TractionPoint> tractionPointList = new List<TractionPoint>();
-        public new float X { get { return base.X; } set { base.X = value; OnLineChange(null); } }
-        public new float Y { get { return base.Y; } set { base.Y = value; OnLineChange(null); } }
-        public float X2 { get { return x2; } set { this.x2 = value; OnLineChange(null); } }
-        public float Y2 { get { return y2; } set { this.y2 = value; OnLineChange(null); } }
+
+        public List<TractionPoint> TractionPoints { get { return this.tractionPointList; } }
+        public new float X { get { return base.X; } set { base.X = value; OnElementChange(null); } }
+        public new float Y { get { return base.Y; } set { base.Y = value; OnElementChange(null); } }
+        public float X2 { get { return x2; } set { this.x2 = value; OnElementChange(null); } }
+        public float Y2 { get { return y2; } set { this.y2 = value; OnElementChange(null); } }
+
+        public PointF P2 { get { return new PointF(X2, Y2); } }
         public new Coordinate ParentCoordinate
         {
             get
@@ -299,21 +324,19 @@ namespace WinFormControl
                 for (int i = 0; i < tractionPointList.Count; i++) { tractionPointList[i].ParentCoordinate = value; }
             }
         }
-        public event ElementChangeEvent LineChangeEventHandler;
-
 
         public Line() : this(-10f, -10f, -5f, -5f) { }
 
-        public Line(float x1, float y1, float x2, float y2)
+        public Line(float x1, float y1, float x2, float y2):base()
         {
             this.ElememtCursor = Rectangle.ElementDefaultCursor;
-
-            for (int i = 0; i < tractionPointList.Count; i++)
+            for (int i = 0; i < Line.PointAmount; i++)
             {
                 tractionPointList.Add( new TractionPoint(this));
                 tractionPointList[i].ElememtCursor = Cursors.SizeAll;
                 tractionPointList[i].Name = "tractionPoint" + i;
                 tractionPointList[i].OnTractionEventHandler += OnLinePointTraction;
+                tractionPointList[i].ParentElement = this;
             }
             this.X = x1;
             this.Y = y1;
@@ -323,7 +346,28 @@ namespace WinFormControl
             this.Visible = true;
             this.ParentElement = null;
 
-            LineChangeEventHandler = new ElementChangeEvent(OnLineChange);
+        }
+        public override void OnElementChange(Element element)
+        {
+            tractionPointList[0].X = this.X;
+            tractionPointList[0].Y = this.Y;
+            tractionPointList[1].X = this.X2;
+            tractionPointList[1].Y = this.Y2;
+        }
+
+        public override void Draw(Graphics g, Pen p)
+        {
+            PointF p1 = Coordinate.CoordinateTransport(this.Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
+            PointF p2 = Coordinate.CoordinateTransport(this.P2, this.ParentCoordinate, Coordinate.BaseCoornidate);
+
+            g.DrawLine(p, p1, p2);
+            if (true)
+            {
+                for (int i = 0; i < Line.PointAmount; i++)
+                {
+                    tractionPointList[i].Draw(g, p);
+                }
+            }
         }
 
         public override void BeSelect(bool b)
@@ -334,18 +378,9 @@ namespace WinFormControl
             }
         }
 
-        public void OnLineChange(Element element)
+        public void OnLinePointTraction(TractionPoint tp, float x, float y)
         {
-            tractionPointList[0].X = this.X; 
-            tractionPointList[0].Y=this.Y;
-            tractionPointList[1].X = this.X2; 
-            tractionPointList[1].Y=this.Y2;
-        }
-
-
-        public void OnLinePointTraction(TractionPoint element,float x, float y)
-        {
-            switch (element.Name)
+            switch (tp.Name)
             {
                 case "tractionPoint0":
                     this.X = x;
@@ -368,6 +403,8 @@ namespace WinFormControl
                 {
                     case 0:
                         this.Location = point;
+                        this.X2 = point.X;
+                        this.Y2 = point.Y;
                         PointCount++;
                         break;
                     case 1:
@@ -400,17 +437,132 @@ namespace WinFormControl
         public override void Move(float x, float y)
         {
             base.Move(x, y);
-            OnLineChange(this);
+            OnElementChange(this);
         }
 
         public override void Move(PointF p)
         {
             base.Move(p);
-            OnLineChange(this);
+            OnElementChange(this);
+        }
+
+        public override bool IsIn(float x, float y)
+        {
+            return false;
         }
 
 
     }
+
+    public class Ellipse : MainElement
+    {
+        public static Cursor ElementDefaultCursor = Cursors.SizeAll;
+        public const float ELLIPSE_DEFAULT_Z = 2f;
+        public new static int PointAmount = 2;//关键点数量
+        private float x2, y2;
+        private List<TractionPoint> tractionPointList = new List<TractionPoint>();
+
+        public List<TractionPoint> TractionPoints { get { return this.tractionPointList; } }
+        public new float X { get { return base.X; } set { base.X = value;  } }
+        public new float Y { get { return base.Y; } set { base.Y = value;  } }
+        public float X2 { get { return x2; } set { this.x2 = value;  } }
+        public float Y2 { get { return y2; } set { this.y2 = value;  } }
+
+        public PointF P2 { get { return new PointF(X2, Y2); } }
+        public new Coordinate ParentCoordinate
+        {
+            get
+            {
+                return base.ParentCoordinate;
+            }
+            set
+            {
+                base.ParentCoordinate = value;
+                for (int i = 0; i < tractionPointList.Count; i++) { tractionPointList[i].ParentCoordinate = value; }
+            }
+        }
+
+        /// <summary>
+        /// 核心构造方法
+        /// </summary>
+        /// <param name="x1"></param>
+        /// <param name="y1"></param>
+        /// <param name="x2"></param>
+        /// <param name="y2"></param>
+        public Ellipse(float x1, float y1, float x2, float y2):base()
+        {
+            this.ElememtCursor = Rectangle.ElementDefaultCursor;
+            for (int i = 0; i < Line.PointAmount; i++)
+            {
+                tractionPointList.Add(new TractionPoint(this));
+                tractionPointList[i].ElememtCursor = Cursors.SizeAll;
+                tractionPointList[i].Name = "tractionPoint" + i;
+                tractionPointList[i].OnTractionEventHandler += OnTraction;
+                tractionPointList[i].ParentElement = this;
+            }
+            this.X = x1;
+            this.Y = y1;
+            this.X2 = x2;
+            this.Y2 = y2;
+            this.Z = ELLIPSE_DEFAULT_Z;
+            this.Visible = true;
+            this.ParentElement = null;
+        }
+        public void OnTraction(TractionPoint tp, float x, float y)
+        {
+            switch (tp.Name)
+            {
+                case "tractionPoint0":
+                    this.X = x;
+                    this.Y = y;
+                    break;
+                case "tractionPoint1":
+                    this.X2 = x;
+                    this.Y2 = y;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+
+        public override void Draw(Graphics g, Pen p)
+        {
+            //g.DrawEllipse()//
+        }
+
+        public override bool AddKeyPoint(PointF point)
+        {
+            return base.AddKeyPoint(point);
+        }
+        public override void AdjustLastKeyPoint(PointF point)
+        {
+            base.AdjustLastKeyPoint(point);
+        }
+        public override void BeSelect(bool b)
+        {
+            throw new NotImplementedException();
+        }
+        public override bool IsIn(float x, float y)
+        {
+            return base.IsIn(x, y);
+        }
+
+        public override void Move(float x, float y)
+        {
+            base.Move(x, y);
+        }
+        public override void Move(PointF p)
+        {
+            
+            base.Move(p);
+        }
+        public override void OnElementChange(Element element)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class TractionPoint:Element
     {
 
@@ -437,13 +589,18 @@ namespace WinFormControl
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <param name="parent"></param>
-        public TractionPoint(float x, float y,Element parent)
+        public TractionPoint(float x, float y,Element parent):base()
         {
             this.Size = 4f;
             this.X = x;
             this.Y = y;
             ParentElement = parent;
             this.Z = parent.Z + 0.01f;
+        }
+
+        public override void OnElementChange(Element element)
+        {
+            throw new NotImplementedException();
         }
 
         public override void BeSelect(bool b)
@@ -501,6 +658,13 @@ namespace WinFormControl
             return false;
         }
 
+        public override void Draw(Graphics g, Pen p)
+        {
+            PointF loca = Coordinate.CoordinateTransport(this.Location, this.ParentElement.ParentCoordinate, Coordinate.BaseCoornidate);
+            g.FillRectangle(Brushes.Black, loca.X - this.Size / 2, loca.Y - this.Size / 2, this.Size, this.Size);
+            g.DrawRectangle(Pens.White, loca.X - this.Size / 2, loca.Y - this.Size / 2, this.Size, this.Size);
+        }
+
     }
 
     public class ImageElement : MainElement
@@ -516,9 +680,14 @@ namespace WinFormControl
             set { this.image = value; this.Width = (Image == null) ? 0 : image.Width; this.Height = (Image == null) ? 0 : image.Height; }
         }
         //public float ImageScale { get { return imageScale; } set { imageScale = value; } }
-        public ImageElement()
+        public ImageElement():base()
         {
 
+        }
+
+        public override void OnElementChange(Element element)
+        {
+            throw new NotImplementedException();
         }
         public void FitToWindow(int w,int h)
         {

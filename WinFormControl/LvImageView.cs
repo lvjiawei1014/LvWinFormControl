@@ -101,13 +101,16 @@ namespace WinFormControl
                 Pen p=new Pen(Color.Blue);
                 foreach (Element element in elements)
                 {
-                    if (element is Rectangle)
+                    if (element.Visible)
                     {
-                        Rectangle rect =element as Rectangle;
-                        PaintElement( g,  p,  rect);
-                    }
+                        element.Draw(g, p);
+                    } 
                 }
-                PaintElement(g, p, drawingElement);
+                if (drawingElement != null && drawingElement.Visible)
+                {
+                    drawingElement.Draw(g, p);
+                }
+                
             }
 
         }
@@ -178,6 +181,23 @@ namespace WinFormControl
                 AddRectangle(element as Rectangle);
                 return;
             }
+            if (element is Line)
+            {
+                AddLine(element as Line);
+                return;
+
+            }
+        }
+
+        public void AddLine(Line line)
+        {
+            line.ParentCoordinate = imageElement.coordinate;
+            line.ParentElement = imageElement;
+            elements.Add(line);
+            baseElements.Add(line);
+            baseElements.Add(line.TractionPoints[0]);
+            baseElements.Add(line.TractionPoints[1]);
+            baseElements.Sort();
         }
         public void AddRectangle(Rectangle rect)
         {
@@ -248,6 +268,11 @@ namespace WinFormControl
         {
             CreateElement(type, "");
         }
+        /// <summary>
+        /// 在绘制前先创建好对象
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="name"></param>
         public void CreateElement(ElementType type, string name)
         {
             switch (type)
@@ -257,6 +282,7 @@ namespace WinFormControl
                 case ElementType.Point:
                     break;
                 case ElementType.Line:
+                    this.drawingElement = new Line();
                     break;
                 case ElementType.Rectangle:
                     this.drawingElement = new Rectangle();
@@ -270,6 +296,7 @@ namespace WinFormControl
             this.MouseState = MouseState.Idle;
             this.ImageViewState = ImageViewState.Draw;
             this.DrawingElementType = type;
+            this.drawingElement.Visible = false;
         }
 
 
@@ -308,6 +335,7 @@ namespace WinFormControl
                 if(MouseState==MouseState.Idle)
                 {
                     MouseState = MouseState.Operating;
+                    drawingElement.Visible = true;
                 }
                 //如果添加了最后一个点
                 if (drawingElement.AddKeyPoint(p))
