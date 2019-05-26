@@ -9,6 +9,7 @@ using System.Windows.Forms;
 
 namespace WinFormControl
 {
+    [ToolboxItem(true)]
     public partial class LvImageView : Panel
     {
         #region 静态成员
