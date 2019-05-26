@@ -23,8 +23,8 @@ namespace WinFormControl
         /// <summary>
         /// 交互元素
         /// </summary>
-        private List<Element> elements;
-        private List<Element> baseElements;
+        public List<Element> elements;
+        public List<Element> baseElements;
         private Element operatedElement;
         private Element drawingElement;
         public Element selectedElement;
