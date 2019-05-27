@@ -5,24 +5,58 @@ using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace WinFormControl
+namespace LvControl.ImageView.Elements
 {
+    [Serializable()]
+    public class KeyPoint
+    {
+
+
+        public delegate void KeyPointChangeEvent(KeyPoint kp, float x, float y);
+        public KeyPointChangeEvent KeyPointChangeEventHandler;
+        public TractionPoint tractionPoint;
+        public Element Parent { get; set; }
+        public float X { get { return tractionPoint.X; } set { tractionPoint.X = value; } }
+        public float Y { get { return tractionPoint.Y; } set { tractionPoint.Y = value; } }
+        public PointF Location { get { return new PointF(X, Y); } set { this.X = value.X; this.Y = value.Y; } }
+        public KeyPoint(float x,float y,Element parent)
+        {
+            this.tractionPoint = new TractionPoint(x, y, parent);
+            this.tractionPoint.OnTractionEventHandler += OnTraction;
+            
+        }
+
+        public void OnTraction(TractionPoint elemant, float x, float y)
+        {
+            if (KeyPointChangeEventHandler != null)
+            {
+                KeyPointChangeEventHandler(this, X, Y);
+            }
+        }
+    }
+
     [Serializable()]
     public abstract class Element:IComparable<Element>
     {
+        #region 成员
         private bool selected = false;
+        public Color ElementColor = Color.Blue;
         public string info;
         public static Cursor ElememtDefaultCursor = Cursors.Cross;
         /// <summary>
         /// 元素坐标系
         /// </summary>
-        public Coordinate coordinate=new Coordinate();
+        public Coordinate coordinate = new Coordinate();
         public bool isComplete = false;
         public static int PointAmount;
         public int PointCount;
         public Cursor ElememtCursor = ElememtDefaultCursor;
+        #endregion
+
+
+
+        #region 属性
         public bool IsComplete { get; set; }
-        public CoordinateType CoordinateType { get; set; }
         public string Name { get; set; }
         public float X { get { return coordinate.X; } set { coordinate.X = value; } }
         public float Y { get { return coordinate.Y; } set { coordinate.Y = value; } }
@@ -38,16 +72,32 @@ namespace WinFormControl
         /// <summary>
         /// 父元素
         /// </summary>
-        public Element ParentElement{get;set;}
+        public Element ParentElement { get; set; }
+        /// <summary>
+        /// 父坐标系
+        /// </summary>
         public Coordinate ParentCoordinate { get; set; }
         /// <summary>
         /// 可见性
         /// </summary>
-        public bool Visible{get;set;}
+        public bool Visible { get; set; }
+        /// <summary>
+        /// 是否被选中
+        /// </summary>
         public bool Selected { get { return selected; } set { this.selected = value; BeSelect(value); } }
 
+        #endregion
 
+
+
+        #region 事件
         public ElementChangeEvent ElementChangeEventHandler;
+        #endregion
+
+        
+        
+
+        
 
         public abstract void OnElementChange(Element element);
 
@@ -100,6 +150,169 @@ namespace WinFormControl
     public abstract class MainElement : Element
     {
         public MainElement() : base() { }
+    }
+    [Serializable()]
+    public abstract class KeyPointElement : MainElement
+    {
+        public static int KeyPointAmount;
+
+        protected int keyPointCount;
+
+        protected List<KeyPoint> keyPointList = new List<KeyPoint>();
+
+        public int KeyPointCount { get { return keyPointCount; }  }
+        public KeyPointElement()
+            : base()
+        { }
+    }
+
+    public class PolygonElement:KeyPointElement
+    {
+        public new static int KeyPointAmount = 0;
+        public int PolygonKeyPointAmount = -1;
+
+        private KeyPoint tmpPoint;
+
+
+        public new float X
+        {
+            get
+            {
+                if (keyPointList.Count > 0) 
+                {
+                    return keyPointList[0].X; 
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            set
+            {
+                if (keyPointList.Count > 0)
+                {
+                    keyPointList[0].X=value;
+                }
+            }
+        }
+
+        public new float Y
+        {
+            get
+            {
+                if (keyPointList.Count > 0)
+                {
+                    return keyPointList[0].Y;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            set
+            {
+                if (keyPointList.Count > 0)
+                {
+                    keyPointList[0].Y = value;
+                }
+            }
+        }
+        public PolygonElement():base()
+        {
+
+             
+        }
+
+
+        public void OnKeyPointChange(KeyPoint keyPoint,float x,float y)
+        {
+
+
+        }
+
+        public bool Check()
+        {
+            return true;
+        }
+        public override bool AddKeyPoint(PointF point)
+        {
+            KeyPoint kp = new KeyPoint(point.X, point.Y,this);
+            kp.KeyPointChangeEventHandler += OnKeyPointChange;
+            this.keyPointList.Add(kp);
+            return false;
+        }
+        public override void AdjustLastKeyPoint(PointF point)
+        {
+            base.AdjustLastKeyPoint(point);
+        }
+        public override void Draw(Graphics g, Pen p)
+        {
+            if(p==null)
+            {
+                p = new Pen(this.ElementColor);
+            }
+            for(int i= 0;i<keyPointList.Count-1;i++)
+            {
+                g.DrawLine(p, keyPointList[i].Location, keyPointList[i + 1].Location);
+            }
+            if(this.isComplete && keyPointList.Count>0)
+            {
+                g.DrawLine(p, keyPointList.Last().Location, keyPointList.First().Location);
+            }
+            for (int i = 0; i < keyPointList.Count; i++)
+            {
+                keyPointList[i].tractionPoint.Draw(g, p);
+            }
+            if (tmpPoint != null && isComplete == false)
+            {
+                g.DrawLine(p, keyPointList.Last().Location, tmpPoint.Location);
+            }
+        }
+
+
+        public override bool IsIn(float x, float y)
+        {
+            return false;
+        }
+        public override void BeSelect(bool b)
+        {
+            for (int i = 0; i < keyPointList.Count; i++)
+            {
+                keyPointList[i].tractionPoint.Visible = b;
+            }
+        }
+
+        public override void Move(float x, float y)
+        {
+            float dx = x - this.X;
+            float dy = y - this.Y;
+            for(int i=0;i<keyPointList.Count;i++)
+            {
+                keyPointList[i].X += dx;
+                keyPointList[i].Y += dy;
+            }
+        }
+
+        public override void Move(PointF p)
+        {
+            this.Move(p.X,p.Y);
+        }
+        public override void OnElementChange(Element element)
+        {
+            
+        }
+
+        public bool Complete()
+        {
+             if(Check())
+             {
+                 this.IsComplete = true;
+                 return true;
+             }else
+             {
+                 return false;
+             }
+        }
     }
     /// <summary>
     /// 矩形元素
@@ -597,7 +810,7 @@ namespace WinFormControl
         {
             this.Size = 4f;
             this.X = x;
-            this.Y = y;
+            this.Y = y; 
             ParentElement = parent;
             this.Z = parent.Z + 0.01f;
         }
@@ -714,15 +927,13 @@ namespace WinFormControl
         }
 
     }
-    [Serializable()]
-    public enum CoordinateType
-    {
-        Base=0,
-        Image=1,
-    }
+
 
     [Serializable()]
     public delegate void ElementChangeEvent(Element element);
+    [Serializable()]
+    public delegate void ElementCreateEvent(Element elemant);
+    
 
 
     /// <summary>

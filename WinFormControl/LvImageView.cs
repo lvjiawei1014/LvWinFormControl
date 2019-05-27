@@ -6,8 +6,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using LvControl.ImageView.Elements;
 
-namespace WinFormControl
+namespace LvControl.ImageView
 {
     [ToolboxItem(true)]
     public partial class LvImageView : Panel
@@ -178,9 +179,9 @@ namespace WinFormControl
         }
         public void AddElement(Element element)
         {
-            if (element is Rectangle)
+            if (element is LvControl.ImageView.Elements.Rectangle)
             {
-                AddRectangle(element as Rectangle);
+                AddRectangle(element as LvControl.ImageView.Elements.Rectangle);
                 return;
             }
             if (element is Line)
@@ -201,7 +202,7 @@ namespace WinFormControl
             baseElements.Add(line.TractionPoints[1]);
             baseElements.Sort();
         }
-        public void AddRectangle(Rectangle rect)
+        public void AddRectangle(LvControl.ImageView.Elements.Rectangle rect)
         {
             rect.ParentCoordinate = imageElement.coordinate;
             rect.ParentElement = imageElement;
@@ -356,25 +357,36 @@ namespace WinFormControl
             PointF p = Coordinate.CoordinateTransport(e.Location, Coordinate.BaseCoornidate, imageElement.coordinate);
             if (ImageViewState == ImageViewState.Draw)//绘制模式
             {
-                this.SelectElement(this.drawingElement);
-                if(MouseState==MouseState.Idle)
+                if(e.Button==MouseButtons.Left)
                 {
-                    MouseState = MouseState.Operating;
-                    drawingElement.Visible = true;
-                }
-                //如果添加了最后一个点
-                if (drawingElement.AddKeyPoint(p))
+                    this.SelectElement(this.drawingElement);
+                    if (MouseState == MouseState.Idle)
+                    {
+                        MouseState = MouseState.Operating;
+                        drawingElement.Visible = true;
+                    }
+                    //如果添加了最后一个点
+                    if (drawingElement.AddKeyPoint(p))
+                    {
+                        MouseState = MouseState.Idle;
+                        this.ElementCreateEventHandler(drawingElement);//触发事件
+                        CreateElement(this.DrawingElementType);
+                    }
+                }else if(e.Button==MouseButtons.Right)
                 {
-                    MouseState = MouseState.Idle;
-                    this.ElementCreateEventHandler(drawingElement);//触发事件
-                    CreateElement(this.DrawingElementType);
+                    if(drawingElement is PolygonElement)
+                    {
+                        PolygonElement p = drawingElement as PolygonElement;
+                        if(p.Complete())
+                        {
+
+                        }
+                    }
                 }
+                
                 this.Refresh();
             }
-            if (ImageViewState == ImageViewState.Edit)
-            {
-                //编辑模式不处理Click
-            }
+
         }
 
         private void LvImageView_MouseMove(object sender, MouseEventArgs e)

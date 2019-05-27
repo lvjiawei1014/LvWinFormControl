@@ -1,4 +1,4 @@
-﻿namespace WinFormControl
+﻿namespace LvControl.ImageView
 {
     partial class LvImageView
     {

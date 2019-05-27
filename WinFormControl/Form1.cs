@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using LvControl.ImageView;
+using LvControl.ImageView.Elements;
 
 namespace WinFormControl
 {
@@ -21,7 +23,7 @@ namespace WinFormControl
         private void Form1_Load(object sender, EventArgs e)
         {
             lvImageView1.AutoFit = true;
-            Rectangle rect = new Rectangle(100f, 100f, 400f, 300f);
+            LvControl.ImageView.Elements.Rectangle rect = new LvControl.ImageView.Elements.Rectangle(100f, 100f, 400f, 300f);
             rect.Name = "rect";
             lvImageView1.AddRectangle(rect);
             image= Image.FromFile("1.jpg");
