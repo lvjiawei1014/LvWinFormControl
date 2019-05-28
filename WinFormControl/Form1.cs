@@ -75,5 +75,10 @@ namespace WinFormControl
 
         }
 
+        private void btnPolygon_Click(object sender, EventArgs e)
+        {
+            lvImageView1.CreateElement(ElementType.Polygon);
+        }
+
     }
 }

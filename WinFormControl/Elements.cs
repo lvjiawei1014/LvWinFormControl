@@ -21,7 +21,14 @@ namespace LvControl.ImageView.Elements
         public PointF Location { get { return new PointF(X, Y); } set { this.X = value.X; this.Y = value.Y; } }
         public KeyPoint(float x,float y,Element parent)
         {
+            this.Parent = parent;
             this.tractionPoint = new TractionPoint(x, y, parent);
+            tractionPoint.ParentCoordinate = parent.ParentCoordinate;
+            tractionPoint.ParentElement = parent;
+            tractionPoint.ElementCursor=Cursors.SizeAll;
+            tractionPoint.Z=tractionPoint.ParentElement.Z-0.01f;
+            tractionPoint.Visible = true;
+            
             this.tractionPoint.OnTractionEventHandler += OnTraction;
             
         }
@@ -50,20 +57,20 @@ namespace LvControl.ImageView.Elements
         public bool isComplete = false;
         public static int PointAmount;
         public int PointCount;
-        public Cursor ElememtCursor = ElememtDefaultCursor;
+        public Cursor ElementCursor = ElememtDefaultCursor;
         #endregion
 
 
 
         #region 属性
-        public bool IsComplete { get; set; }
+        public bool IsComplete { get { return isComplete; } set { this.isComplete = value; } }
         public string Name { get; set; }
-        public float X { get { return coordinate.X; } set { coordinate.X = value; } }
-        public float Y { get { return coordinate.Y; } set { coordinate.Y = value; } }
-        public float Z { get { return coordinate.Z; } set { coordinate.Z = value; } }
-        public float Width { get { return coordinate.Width; } set { coordinate.Width = value; } }
-        public float Height { get { return coordinate.Height; } set { coordinate.Height = value; } }
-        public PointF Location
+        public virtual float X { get { return coordinate.X; } set { coordinate.X = value; } }
+        public virtual float Y { get { return coordinate.Y; } set { coordinate.Y = value; } }
+        public virtual float Z { get { return coordinate.Z; } set { coordinate.Z = value; } }
+        public virtual float Width { get { return coordinate.Width; } set { coordinate.Width = value; } }
+        public virtual float Height { get { return coordinate.Height; } set { coordinate.Height = value; } }
+        public virtual PointF Location
         {
             get { return coordinate.Location; }
             set { this.X = value.X; this.Y = value.Y; }
@@ -109,7 +116,7 @@ namespace LvControl.ImageView.Elements
         {
             return false;
         }
-        public virtual void AdjustLastKeyPoint(PointF point)
+        public virtual void AdjustNextKeyPoint(PointF point)
         {
 
         }
@@ -158,7 +165,7 @@ namespace LvControl.ImageView.Elements
 
         protected int keyPointCount;
 
-        protected List<KeyPoint> keyPointList = new List<KeyPoint>();
+        public List<KeyPoint> keyPointList = new List<KeyPoint>();
 
         public int KeyPointCount { get { return keyPointCount; }  }
         public KeyPointElement()
@@ -171,10 +178,10 @@ namespace LvControl.ImageView.Elements
         public new static int KeyPointAmount = 0;
         public int PolygonKeyPointAmount = -1;
 
-        private KeyPoint tmpPoint;
+        private KeyPoint tmpPoint;//绘图时的临时关键点
 
 
-        public new float X
+        public override float X
         {
             get
             {
@@ -196,7 +203,7 @@ namespace LvControl.ImageView.Elements
             }
         }
 
-        public new float Y
+        public override float Y
         {
             get
             {
@@ -217,9 +224,13 @@ namespace LvControl.ImageView.Elements
                 }
             }
         }
+
+        public override PointF Location { get { return new PointF(this.X, this.Y); } set { this.X = value.X; this.Y = value.Y; } }
         public PolygonElement():base()
         {
-
+            Z = 2f;
+            this.ElementCursor = Cursors.SizeAll;
+            tmpPoint = new KeyPoint(0, 0, this);
              
         }
 
@@ -236,14 +247,20 @@ namespace LvControl.ImageView.Elements
         }
         public override bool AddKeyPoint(PointF point)
         {
+            if (this.keyPointList.Count == 0)
+            {
+                this.tmpPoint.X = point.X;
+                this.tmpPoint.Y = point.Y;
+            }
             KeyPoint kp = new KeyPoint(point.X, point.Y,this);
             kp.KeyPointChangeEventHandler += OnKeyPointChange;
             this.keyPointList.Add(kp);
             return false;
         }
-        public override void AdjustLastKeyPoint(PointF point)
+        public override void AdjustNextKeyPoint(PointF point)
         {
-            base.AdjustLastKeyPoint(point);
+            tmpPoint.X = point.X;
+            tmpPoint.Y = point.Y;
         }
         public override void Draw(Graphics g, Pen p)
         {
@@ -253,25 +270,45 @@ namespace LvControl.ImageView.Elements
             }
             for(int i= 0;i<keyPointList.Count-1;i++)
             {
-                g.DrawLine(p, keyPointList[i].Location, keyPointList[i + 1].Location);
+                PointF p1 = Coordinate.CoordinateTransport(keyPointList[i].Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
+                PointF p2 = Coordinate.CoordinateTransport(keyPointList[i + 1].Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
+                g.DrawLine(p, p1, p2);
             }
             if(this.isComplete && keyPointList.Count>0)
             {
-                g.DrawLine(p, keyPointList.Last().Location, keyPointList.First().Location);
+                PointF p1 = Coordinate.CoordinateTransport(keyPointList.Last().Location,this.ParentCoordinate, Coordinate.BaseCoornidate);
+                PointF p2 = Coordinate.CoordinateTransport(keyPointList.First().Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
+                g.DrawLine(p, p1, p2);
             }
-            for (int i = 0; i < keyPointList.Count; i++)
+            if (this.Selected)
             {
-                keyPointList[i].tractionPoint.Draw(g, p);
+                for (int i = 0; i < keyPointList.Count; i++)
+                {
+                    keyPointList[i].tractionPoint.Draw(g, p);
+                }
             }
-            if (tmpPoint != null && isComplete == false)
+            if (tmpPoint != null && isComplete == false&& keyPointList.Count>0)
             {
-                g.DrawLine(p, keyPointList.Last().Location, tmpPoint.Location);
+                PointF p1 = Coordinate.CoordinateTransport(keyPointList.Last().Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
+                PointF p2 = Coordinate.CoordinateTransport(tmpPoint.Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
+                g.DrawLine(p, p1, p2);
             }
         }
 
 
         public override bool IsIn(float x, float y)
         {
+            PointF p=new PointF(x,y);
+            for(int i=0;i<this.keyPointList.Count-1;i++){
+                if(Geometry.IsPointOnLine(p,keyPointList[i].Location,keyPointList[i+1].Location,6f))
+                {
+                    return true;
+                }
+            }
+            if(Geometry.IsPointOnLine(p,keyPointList.Last().Location,keyPointList.First().Location,6f))
+            {
+                return true;
+            }
             return false;
         }
         public override void BeSelect(bool b)
@@ -362,16 +399,16 @@ namespace LvControl.ImageView.Elements
         /// <param name="height"></param>
         public Rectangle(float x, float y, float width, float height):base()
         {
-            this.ElememtCursor = Rectangle.ElementDefaultCursor;
+            this.ElementCursor = Rectangle.ElementDefaultCursor;
             this.leftTopPoint = new TractionPoint(this);
             this.leftBottomPoint = new TractionPoint(this);
             this.rightTopPoint = new TractionPoint(this);
             this.rightBottomPoint = new TractionPoint(this);
 
-            this.leftTopPoint.ElememtCursor = Cursors.SizeAll;
-            this.leftBottomPoint.ElememtCursor = Cursors.SizeNESW;
-            this.rightBottomPoint.ElememtCursor = Cursors.SizeNWSE;
-            this.rightTopPoint.ElememtCursor = Cursors.SizeNESW;
+            this.leftTopPoint.ElementCursor = Cursors.SizeAll;
+            this.leftBottomPoint.ElementCursor = Cursors.SizeNESW;
+            this.rightBottomPoint.ElementCursor = Cursors.SizeNWSE;
+            this.rightTopPoint.ElementCursor = Cursors.SizeNESW;
 
             this.X = x;
             Y = y;
@@ -484,7 +521,7 @@ namespace LvControl.ImageView.Elements
             }
             return isComplete;
         }
-        public override void AdjustLastKeyPoint(PointF point)
+        public override void AdjustNextKeyPoint(PointF point)
         {
             switch (PointCount)
             {
@@ -523,8 +560,8 @@ namespace LvControl.ImageView.Elements
         private List<TractionPoint> tractionPointList = new List<TractionPoint>();
 
         public List<TractionPoint> TractionPoints { get { return this.tractionPointList; } }
-        public new float X { get { return base.X; } set { base.X = value; OnElementChange(null); } }
-        public new float Y { get { return base.Y; } set { base.Y = value; OnElementChange(null); } }
+        public override float X { get { return base.X; } set { base.X = value; OnElementChange(null); } }
+        public override float Y { get { return base.Y; } set { base.Y = value; OnElementChange(null); } }
         public float X2 { get { return x2; } set { this.x2 = value; OnElementChange(null); } }
         public float Y2 { get { return y2; } set { this.y2 = value; OnElementChange(null); } }
 
@@ -546,11 +583,11 @@ namespace LvControl.ImageView.Elements
 
         public Line(float x1, float y1, float x2, float y2):base()
         {
-            this.ElememtCursor = Rectangle.ElementDefaultCursor;
+            this.ElementCursor = Rectangle.ElementDefaultCursor;
             for (int i = 0; i < Line.PointAmount; i++)
             {
                 tractionPointList.Add( new TractionPoint(this));
-                tractionPointList[i].ElememtCursor = Cursors.SizeAll;
+                tractionPointList[i].ElementCursor = Cursors.SizeAll;
                 tractionPointList[i].Name = "tractionPoint" + i;
                 tractionPointList[i].OnTractionEventHandler += OnLinePointTraction;
                 tractionPointList[i].ParentElement = this;
@@ -640,7 +677,7 @@ namespace LvControl.ImageView.Elements
             return isComplete;
         }
 
-        public override void AdjustLastKeyPoint(PointF point)
+        public override void AdjustNextKeyPoint(PointF point)
         {
             switch (PointCount)
             {
@@ -653,25 +690,30 @@ namespace LvControl.ImageView.Elements
 
         public override void Move(float x, float y)
         {
-            base.Move(x, y);
+            float dx = x - this.X;
+            float dy = y - this.Y;
+            this.X += dx;
+            this.Y += dy;
+            this.x2 += dx;
+            this.y2 += dy;
             OnElementChange(this);
         }
 
         public override void Move(PointF p)
         {
-            base.Move(p);
-            OnElementChange(this);
+            this.Move(p.X, p.Y);
         }
 
         public override bool IsIn(float x, float y)
         {
-            return false;
+            PointF p=new PointF(x,y);
+            return (Geometry.IsPointOnLine(p, this.Location, this.P2, 6f));
         }
 
 
     }
-
-    public class Ellipse : MainElement
+    [Serializable()]
+    public class EllipseElement : MainElement
     {
         public static Cursor ElementDefaultCursor = Cursors.SizeAll;
         public const float ELLIPSE_DEFAULT_Z = 2f;
@@ -706,13 +748,13 @@ namespace LvControl.ImageView.Elements
         /// <param name="y1"></param>
         /// <param name="x2"></param>
         /// <param name="y2"></param>
-        public Ellipse(float x1, float y1, float x2, float y2):base()
+        public EllipseElement(float x1, float y1, float x2, float y2):base()
         {
-            this.ElememtCursor = Rectangle.ElementDefaultCursor;
+            this.ElementCursor = Rectangle.ElementDefaultCursor;
             for (int i = 0; i < Line.PointAmount; i++)
             {
                 tractionPointList.Add(new TractionPoint(this));
-                tractionPointList[i].ElememtCursor = Cursors.SizeAll;
+                tractionPointList[i].ElementCursor = Cursors.SizeAll;
                 tractionPointList[i].Name = "tractionPoint" + i;
                 tractionPointList[i].OnTractionEventHandler += OnTraction;
                 tractionPointList[i].ParentElement = this;
@@ -752,13 +794,13 @@ namespace LvControl.ImageView.Elements
         {
             return base.AddKeyPoint(point);
         }
-        public override void AdjustLastKeyPoint(PointF point)
+        public override void AdjustNextKeyPoint(PointF point)
         {
-            base.AdjustLastKeyPoint(point);
+            base.AdjustNextKeyPoint(point);
         }
         public override void BeSelect(bool b)
         {
-            throw new NotImplementedException();
+            
         }
         public override bool IsIn(float x, float y)
         {
@@ -808,7 +850,7 @@ namespace LvControl.ImageView.Elements
         /// <param name="parent"></param>
         public TractionPoint(float x, float y,Element parent):base()
         {
-            this.Size = 4f;
+            this.Size = 6f;
             this.X = x;
             this.Y = y; 
             ParentElement = parent;
@@ -982,6 +1024,44 @@ namespace LvControl.ImageView.Elements
             point.X = (src.Location.X + p.X * src.Scale - dst.Location.X) / dst.Scale;
             point.Y = (src.Location.Y + p.Y * src.Scale - dst.Location.Y) / dst.Scale;
             return point;
+        }
+    }
+
+
+    public class Geometry
+    {
+        public static bool IsPointOnLine(PointF p,PointF linePoint1,PointF linePoint2,float lineWidth)
+        {
+            float lineLength=(float)Math.Sqrt(Math.Pow(linePoint1.X-linePoint2.X,2)+Math.Pow(linePoint1.Y-linePoint2.Y,2));
+            PointF center = new PointF(0.5f * (linePoint1.X + linePoint2.X), 0.5f * (linePoint1.Y + linePoint2.Y));
+            if (linePoint1.X == linePoint2.X)
+            {
+                if (Math.Abs(p.X - center.X) < 0.5 * lineWidth && Math.Abs(p.Y - center.Y) < 0.5 * lineLength)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                float k1 = (linePoint1.Y - linePoint2.Y) / (linePoint1.X - linePoint2.X);
+                float k2 = -1 / k1;
+                float b1 = center.Y - k1 * center.X;
+                float b2 = center.Y - k2 * center.X;
+                float d1 = (float)Math.Abs((k1 * p.X - p.Y + b1) / Math.Sqrt(k1 * k1 + 1));
+                float d2 = (float)Math.Abs((k2 * p.X - p.Y + b2) / Math.Sqrt(k2 * k2 + 1));
+                if (d1 < 0.5 * lineWidth && d2 < 0.5 * lineLength)
+                {
+                    return true;
+                }else
+                {
+                    return false;
+                }
+            }
+            
         }
     }
 }

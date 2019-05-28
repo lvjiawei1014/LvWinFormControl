@@ -33,7 +33,8 @@ namespace LvControl.ImageView
 
         private Point operationStartControlPoint;
         private PointF operationStartImagePoint;
-        private PointF targetStartImagePoint;
+        private PointF operatedElementStartPoint;//被操作的element的初始位置
+
         #endregion
         #region 属性
         public Image Image {
@@ -190,6 +191,10 @@ namespace LvControl.ImageView
                 return;
 
             }
+            if(element is PolygonElement)
+            {
+                AddPolypon(element as PolygonElement);
+            }
         }
 
         public void AddLine(Line line)
@@ -200,6 +205,19 @@ namespace LvControl.ImageView
             baseElements.Add(line);
             baseElements.Add(line.TractionPoints[0]);
             baseElements.Add(line.TractionPoints[1]);
+            baseElements.Sort();
+        }
+
+        public void AddPolypon(PolygonElement polygon)
+        {
+            polygon.ParentCoordinate = imageElement.coordinate;
+            polygon.ParentElement = imageElement;
+            elements.Add(polygon);
+            baseElements.Add(polygon);
+            for(int i=0;i<polygon.keyPointList.Count;i++)
+            {
+                baseElements.Add(polygon.keyPointList[i].tractionPoint);
+            }
             baseElements.Sort();
         }
         public void AddRectangle(LvControl.ImageView.Elements.Rectangle rect)
@@ -259,12 +277,12 @@ namespace LvControl.ImageView
         #region GDI绘制
         private void PaintElement(Graphics g, Pen pen, Element element)
         {
-            if (element is Rectangle)
+            if (element is LvControl.ImageView.Elements.Rectangle)
             {
-                PaintElement(g, pen, element as Rectangle);
+                PaintElement(g, pen, element as LvControl.ImageView.Elements.Rectangle);
             }
         }
-        private void PaintElement(Graphics g,Pen pen,Rectangle rect)
+        private void PaintElement(Graphics g,Pen pen,LvControl.ImageView.Elements.Rectangle rect)
         {
             PointF loca = Coordinate.CoordinateTransport(rect.Location,imageElement.coordinate, Coordinate.BaseCoornidate);
             g.DrawRectangle(pen, loca.X, loca.Y, rect.Width * ImageScale, rect.Height * ImageScale);
@@ -311,7 +329,10 @@ namespace LvControl.ImageView
                     this.drawingElement = new Line();
                     break;
                 case ElementType.Rectangle:
-                    this.drawingElement = new Rectangle();
+                    this.drawingElement = new LvControl.ImageView.Elements.Rectangle();
+                    break;
+                case ElementType.Polygon:
+                    this.drawingElement=new PolygonElement();
                     break;
                 default:
                     break;
@@ -376,10 +397,17 @@ namespace LvControl.ImageView
                 {
                     if(drawingElement is PolygonElement)
                     {
-                        PolygonElement p = drawingElement as PolygonElement;
-                        if(p.Complete())
+                        PolygonElement polygon = drawingElement as PolygonElement;
+                        if (polygon.Complete())
                         {
-
+                            MouseState = MouseState.Idle;
+                            this.ElementCreateEventHandler(drawingElement);
+                            CreateElement(this.DrawingElementType);
+                        }
+                        else
+                        {
+                            MouseState = MouseState.Idle;
+                            this.drawingElement = null;
                         }
                     }
                 }
@@ -419,7 +447,7 @@ namespace LvControl.ImageView
             {
                 if (MouseState == MouseState.Operating)
                 {
-                    drawingElement.AdjustLastKeyPoint(p);
+                    drawingElement.AdjustNextKeyPoint(p);
                     this.Refresh();
                 }
             }
@@ -429,7 +457,7 @@ namespace LvControl.ImageView
                 {
                     if (operatedElement != imageElement)
                     {
-                        operatedElement.Move(this.targetStartImagePoint.X + p.X - operationStartImagePoint.X, this.targetStartImagePoint.Y + p.Y - operationStartImagePoint.Y);
+                        operatedElement.Move(this.operatedElementStartPoint.X + p.X - operationStartImagePoint.X, this.operatedElementStartPoint.Y + p.Y - operationStartImagePoint.Y);
                     }
                     else
                     {
@@ -440,7 +468,7 @@ namespace LvControl.ImageView
                 }
                 else
                 {
-                    this.Cursor = targetElement.ElememtCursor;
+                    this.Cursor = targetElement.ElementCursor;
                 }
                 return;
             }
@@ -483,7 +511,7 @@ namespace LvControl.ImageView
                 this.MouseState = MouseState.Operating;
                 this.operationStartControlPoint = e.Location;
                 this.operationStartImagePoint = p;
-                this.targetStartImagePoint = targetElement.Location;
+                this.operatedElementStartPoint = targetElement.Location;
                 System.Console.WriteLine("operationStartImagePoint:" + operationStartImagePoint.X + "  " + operationStartImagePoint.Y);
                 this.SelectElement(operatedElement);
             }
@@ -529,6 +557,9 @@ namespace LvControl.ImageView
 
     }
 
+
+
+
     public enum ImageViewState
     {
         Normal=0,
@@ -548,7 +579,7 @@ namespace LvControl.ImageView
         Point=1,
         Line=2,
         Rectangle=3,
-
+        Polygon=4,
     }
 
     
