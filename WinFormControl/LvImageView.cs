@@ -19,40 +19,39 @@ namespace LvControl.ImageView
 
         #endregion
         #region 成员变量
-        //private Image image = null;
-        private ImageElement imageElement;
-        /// <summary>
-        /// 交互元素
-        /// </summary>
-        public List<Element> elements;
-        public List<Element> baseElements;
-        private Element operatedElement;
-        private Element drawingElement;
-        public Element selectedElement;
-        public Element pointedElement;
+        public List<DisplayItem> Items = new List<DisplayItem>();
+        public DisplayItem curItem;
 
-        private Point operationStartControlPoint;
-        private PointF operationStartImagePoint;
-        private PointF operatedElementStartPoint;//被操作的element的初始位置
+        public ImageElement imageElement { get { return curItem.imageElement; } set { curItem.imageElement = value; } }
+        public Element operatedElement { get { return curItem.operatedElement; } set { curItem.operatedElement = value; } }
+        public Element drawingElement { get { return curItem.drawingElement; } set { curItem.drawingElement = value; } }
+        public Element selectedElement { get { return curItem.selectedElement; } set { curItem.selectedElement = value; } }
+        public Element pointedElement { get { return curItem.pointedElement; } set { curItem.pointedElement = value; } }
+        public Point operationStartControlPoint { get { return curItem.operationStartControlPoint; } set { curItem.operationStartControlPoint = value; } }
+        public PointF operationStartImagePoint { get { return curItem.operationStartImagePoint; } set { curItem.operationStartImagePoint = value; } }
+        public PointF operatedElementStartPoint { get { return curItem.operatedElementStartPoint; } set { curItem.operatedElementStartPoint = value; } }//被操作的element的初始位置
+
+        public List<Element> elements { get { return curItem.elements; } set { curItem.elements = value; } }
+        public List<Element> baseElements { get { return curItem.baseElements; } set { curItem.baseElements = value; } }
 
         #endregion
         #region 属性
         public Image Image {
             get
             {
-                return imageElement.Image;
+                return curItem.imageElement.Image;
             }
             set
             {
-                this.imageElement.Image = value;
+                this.curItem.imageElement.Image = value;
                 OnImageSet(ref value);
             }
         }
         public ImageViewState ImageViewState { get; set; }
         public ElementType DrawingElementType { get; set; }
         public MouseState MouseState { get; set; }
-        public float ImageScale { get { return imageElement.Scale; } set { this.imageElement.Scale = value; } }
-        public PointF ImageLocation { get { return imageElement.Location; } set { imageElement.X = value.X; imageElement.Y = value.Y; } }
+        public float ImageScale { get { return curItem.imageElement.Scale; } set { this.curItem.imageElement.Scale = value; } }
+        public PointF ImageLocation { get { return curItem.imageElement.Location; } set { curItem.imageElement.X = value.X; curItem.imageElement.Y = value.Y; } }
         public bool AutoFit { get; set; }
 
         #endregion
@@ -68,13 +67,14 @@ namespace LvControl.ImageView
             //SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 
-            elements = new List<Element>();
-            baseElements = new List<Element>();
+            curItem = new DisplayItem("default");
+            Items.Add(curItem);
+
             ImageViewState = ImageViewState.Normal;
             MouseState = MouseState.Idle;
 
             InitializeComponent();
-            this.imageElement = new ImageElement();
+            this.curItem.imageElement = new ImageElement();
 
             this.MouseWheel += LvImageView_MouseWheel;
             this.ElementCreateEventHandler += this.OnElementCreate;
@@ -125,6 +125,44 @@ namespace LvControl.ImageView
         }
         #endregion
         #region 核心逻辑
+        public void AddDisplayItem(string name)
+        {
+            this.Items.Add(new DisplayItem(name));
+        }
+        public void AddDisplayItem(DisplayItem item)
+        {
+            this.Items.Add(item);
+        }
+        public void SwitchDisplayItem(string name)
+        {
+            for (int i = 0; i < Items.Count; i++)
+            {
+                if(Items[i].Name==name)
+                {
+                    this.curItem = Items[i];
+                    break;
+                }
+            }
+        }
+        public void SwitchDisplayItem(int index)
+        {
+            if (index < Items.Count && index >= 0)
+            {
+                this.curItem = Items[index];
+            }
+        }
+        public void DeleteDisplayItem(string name)
+        {
+            for (int i = 0; i < Items.Count; i++)
+            {
+                if (Items[i].Name == name)
+                {
+                    Items.Remove(Items[i]);
+                    break;
+                }
+            }
+        }
+
         private void OnImageSet(ref Image image)
         {
             if(image!=null)
@@ -141,6 +179,8 @@ namespace LvControl.ImageView
                 this.Refresh();
             }
         }
+
+
 
         public void ChangeMode(ImageViewState mode)
         {
@@ -180,9 +220,14 @@ namespace LvControl.ImageView
         }
         public void AddElement(Element element)
         {
-            if (element is LvControl.ImageView.Elements.Rectangle)
+            if (element is LvControl.ImageView.Elements.RectangleElement)
             {
-                AddRectangle(element as LvControl.ImageView.Elements.Rectangle);
+                AddRectangle(element as LvControl.ImageView.Elements.RectangleElement);
+                return;
+            }
+            if (element is RectElement)
+            {
+                AddRectangle(element as RectElement);
                 return;
             }
             if (element is Line)
@@ -220,7 +265,19 @@ namespace LvControl.ImageView
             }
             baseElements.Sort();
         }
-        public void AddRectangle(LvControl.ImageView.Elements.Rectangle rect)
+        public void AddRectangle(LvControl.ImageView.Elements.RectangleElement rect)
+        {
+            rect.ParentCoordinate = imageElement.coordinate;
+            rect.ParentElement = imageElement;
+            elements.Add(rect);
+            baseElements.Add(rect);
+            baseElements.Add(rect.leftTopPoint);
+            baseElements.Add(rect.leftBottomPoint);
+            baseElements.Add(rect.rightTopPoint);
+            baseElements.Add(rect.rightBottomPoint);
+            baseElements.Sort();
+        }
+        public void AddRectangle(RectElement rect)
         {
             rect.ParentCoordinate = imageElement.coordinate;
             rect.ParentElement = imageElement;
@@ -275,37 +332,7 @@ namespace LvControl.ImageView
 
         #endregion
         #region GDI绘制
-        private void PaintElement(Graphics g, Pen pen, Element element)
-        {
-            if (element is LvControl.ImageView.Elements.Rectangle)
-            {
-                PaintElement(g, pen, element as LvControl.ImageView.Elements.Rectangle);
-            }
-        }
-        private void PaintElement(Graphics g,Pen pen,LvControl.ImageView.Elements.Rectangle rect)
-        {
-            PointF loca = Coordinate.CoordinateTransport(rect.Location,imageElement.coordinate, Coordinate.BaseCoornidate);
-            g.DrawRectangle(pen, loca.X, loca.Y, rect.Width * ImageScale, rect.Height * ImageScale);
-            if (rect.Selected)
-            {
-                PaintElement(g, pen, rect.leftTopPoint);
-                PaintElement(g, pen, rect.leftBottomPoint);
-                PaintElement(g, pen, rect.rightBottomPoint);
-                PaintElement(g, pen, rect.rightTopPoint);
-            }
-        }
-        /// <summary>
-        /// 绘制拖拽点
-        /// </summary>
-        /// <param name="g"></param>
-        /// <param name="pen"></param>
-        /// <param name="tractionPoint"></param>
-        private void  PaintElement(Graphics g,Pen pen,TractionPoint tractionPoint)
-        {
-            PointF loca = Coordinate.CoordinateTransport(tractionPoint.Location, imageElement.coordinate, Coordinate.BaseCoornidate);
-            g.FillRectangle(Brushes.Black, loca.X - tractionPoint.Size / 2, loca.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
-            g.DrawRectangle(Pens.White, loca.X - tractionPoint.Size / 2, loca.Y - tractionPoint.Size / 2, tractionPoint.Size, tractionPoint.Size);
-        }
+
         #endregion 
         #region 鼠标绘制图形
         public void CreateElement(ElementType type)
@@ -329,7 +356,7 @@ namespace LvControl.ImageView
                     this.drawingElement = new Line();
                     break;
                 case ElementType.Rectangle:
-                    this.drawingElement = new LvControl.ImageView.Elements.Rectangle();
+                    this.drawingElement = new RectElement();
                     break;
                 case ElementType.Polygon:
                     this.drawingElement=new PolygonElement();
@@ -345,7 +372,16 @@ namespace LvControl.ImageView
             this.DrawingElementType = type;
             this.drawingElement.Visible = false;
         }
-
+        public void SelectElement(Element element)
+        {
+            if (this.selectedElement != null && element is MainElement)
+            {
+                this.selectedElement.Selected = false;
+            }
+            this.selectedElement = element;
+            this.selectedElement.Selected = true;
+            this.Refresh();
+        }
 
         #endregion
         #region 辅助方法
@@ -372,7 +408,7 @@ namespace LvControl.ImageView
         //    return point;
         //}
         #endregion
-
+        #region 鼠标事件
         private void LvImageView_MouseClick(object sender, MouseEventArgs e)
         {
             PointF p = Coordinate.CoordinateTransport(e.Location, Coordinate.BaseCoornidate, imageElement.coordinate);
@@ -544,21 +580,31 @@ namespace LvControl.ImageView
             
         }
 
-        public void SelectElement(Element element)
-        {
-            if (this.selectedElement != null && element is MainElement)
-            {
-                this.selectedElement.Selected = false;
-            }
-            this.selectedElement = element;
-            this.selectedElement.Selected = true;
-            this.Refresh();
-        }
+        #endregion
 
     }
 
-
-
+    /// <summary>
+    /// 
+    /// </summary>
+    public class DisplayItem
+    {
+        public string Name { get; set; }
+        public List<Element> elements=new List<Element>();
+        public List<Element> baseElements=new List<Element>();
+        public ImageElement imageElement;
+        public Element operatedElement;
+        public Element drawingElement;
+        public Element selectedElement;
+        public Element pointedElement;
+        public Point operationStartControlPoint;
+        public PointF operationStartImagePoint;
+        public PointF operatedElementStartPoint;//被操作的element的初始位置
+        public DisplayItem(string name)
+        {
+            this.Name = name;
+        }
+    }
 
     public enum ImageViewState
     {

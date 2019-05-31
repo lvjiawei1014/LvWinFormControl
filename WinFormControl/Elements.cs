@@ -172,14 +172,324 @@ namespace LvControl.ImageView.Elements
             : base()
         { }
     }
+    [Serializable()]
+    public class RectElement:KeyPointElement
+    {
+        public static Font DefaultFont = new Font("微软雅黑", 12f, FontStyle.Bold);
+        public static Cursor ElementDefaultCursor = Cursors.SizeAll;
+        public const float RECTANGLE_DEFAULT_Z = 2f;
+        public new static int PointAmount = 2;
+        public KeyPoint keyPoint1, keyPoint2;
+        public TractionPoint leftTopPoint, leftBottomPoint, rightTopPoint, rightBottomPoint;
+        public new Coordinate ParentCoordinate
+        {
+            get
+            {
+                return base.ParentCoordinate;
+            }
+            set
+            {
+                base.ParentCoordinate = value;
+                leftTopPoint.ParentCoordinate = value;
+                leftBottomPoint.ParentCoordinate = value;
+                rightBottomPoint.ParentCoordinate = value;
+                rightTopPoint.ParentCoordinate = value;
+            }
+        }
+        public override float X
+        {
+            get
+            {
+                return leftTopPoint.X;
+            }
+            set
+            {
+                leftTopPoint.X = value;
+                leftBottomPoint.X = value;
+                OnElementChange(this);
+            }
+        }
+        public override float Y
+        {
+            get
+            {
+                return leftTopPoint.Y;
+            }
+            set
+            {
+                leftTopPoint.Y = value;
+                rightTopPoint.Y = value;
+                OnElementChange(this);
+            }
+        }
+
+        public override float Width
+        {
+            get
+            {
+                return rightBottomPoint.X - leftTopPoint.X;
+            }
+            set
+            {
+                rightTopPoint.X = value + leftTopPoint.X;
+                rightBottomPoint.X = rightTopPoint.X;
+                OnElementChange(this);
+            }
+        }
+
+        public override float Height
+        {
+            get
+            {
+                return rightBottomPoint.Y - leftTopPoint.Y;
+            }
+            set
+            {
+                leftBottomPoint.Y = value + leftTopPoint.Y;
+                rightBottomPoint.Y = leftBottomPoint.Y;
+                OnElementChange(this);
+            }
+        }
+        public override PointF Location
+        {
+            get
+            {
+                return new PointF(this.X, this.Y);
+            }
+            set
+            {
+                this.Move(value);
+            }
+        }
+        public RectElement(): this(0f, 0f, 1f, 1f){}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public RectElement(float x, float y, float width, float height):base()
+        {
+            this.ElementCursor = RectElement.ElementDefaultCursor;
+            this.leftTopPoint = new TractionPoint(this);
+            this.leftBottomPoint = new TractionPoint(this);
+            this.rightTopPoint = new TractionPoint(this);
+            this.rightBottomPoint = new TractionPoint(this);
+            keyPoint1 = new KeyPoint(0, 0, this);
+            keyPoint2 = new KeyPoint(0, 0, this);
+            keyPoint1.tractionPoint = leftTopPoint;
+            keyPoint2.tractionPoint = rightBottomPoint;
+
+            this.leftTopPoint.ElementCursor = Cursors.SizeNWSE;
+            this.leftBottomPoint.ElementCursor = Cursors.SizeNESW;
+            this.rightBottomPoint.ElementCursor = Cursors.SizeNWSE;
+            this.rightTopPoint.ElementCursor = Cursors.SizeNESW;
+
+            this.X = x;
+            Y = y;
+            Z = RECTANGLE_DEFAULT_Z;
+            this.Width = width;
+            this.Height = height;
+
+            this.leftTopPoint.OnTractionEventHandler += OnLeftTopPointTraction;
+            this.leftBottomPoint.OnTractionEventHandler += OnLeftBottomPointTraction;
+            this.rightTopPoint.OnTractionEventHandler += OnRightTopPointTraction;
+            this.rightBottomPoint.OnTractionEventHandler += OnRightBottomPointTraction;
+            Visible = true;
+            ParentElement = null;
+        }
+
+        public void FlipVertical()
+        {
+
+            this.leftTopPoint.OnTractionEventHandler -= OnLeftTopPointTraction;
+            this.leftBottomPoint.OnTractionEventHandler -= OnLeftBottomPointTraction;
+            this.rightTopPoint.OnTractionEventHandler -= OnRightTopPointTraction;
+            this.rightBottomPoint.OnTractionEventHandler -= OnRightBottomPointTraction;
+            System.Console.WriteLine("vFlip");
+            TractionPoint tmp = leftTopPoint;
+            leftTopPoint = leftBottomPoint;
+            leftBottomPoint = tmp;
+            tmp = rightTopPoint;
+            rightTopPoint = rightBottomPoint;
+            rightBottomPoint = tmp;
+            this.leftTopPoint.OnTractionEventHandler += OnLeftTopPointTraction;
+            this.leftBottomPoint.OnTractionEventHandler += OnLeftBottomPointTraction;
+            this.rightTopPoint.OnTractionEventHandler += OnRightTopPointTraction;
+            this.rightBottomPoint.OnTractionEventHandler += OnRightBottomPointTraction;
+            this.leftTopPoint.ElementCursor = Cursors.SizeNWSE;
+            this.leftBottomPoint.ElementCursor = Cursors.SizeNESW;
+            this.rightBottomPoint.ElementCursor = Cursors.SizeNWSE;
+            this.rightTopPoint.ElementCursor = Cursors.SizeNESW;
+            System.Console.WriteLine("lt==lb:" + object.ReferenceEquals(leftTopPoint ,leftBottomPoint));
+        }
+        public void FlipHorizontal()
+        {
+            this.leftTopPoint.OnTractionEventHandler -= OnLeftTopPointTraction;
+            this.leftBottomPoint.OnTractionEventHandler -= OnLeftBottomPointTraction;
+            this.rightTopPoint.OnTractionEventHandler -= OnRightTopPointTraction;
+            this.rightBottomPoint.OnTractionEventHandler -= OnRightBottomPointTraction;
+            System.Console.WriteLine("hFlip");
+            TractionPoint tmp = leftTopPoint;
+            leftTopPoint = rightTopPoint;
+            rightTopPoint = tmp;
+            tmp = leftBottomPoint;
+            leftBottomPoint = rightBottomPoint;
+            rightBottomPoint = tmp;
+
+            this.leftTopPoint.OnTractionEventHandler += OnLeftTopPointTraction;
+            this.leftBottomPoint.OnTractionEventHandler += OnLeftBottomPointTraction;
+            this.rightTopPoint.OnTractionEventHandler += OnRightTopPointTraction;
+            this.rightBottomPoint.OnTractionEventHandler += OnRightBottomPointTraction;
+            this.leftTopPoint.ElementCursor = Cursors.SizeNWSE;
+            this.leftBottomPoint.ElementCursor = Cursors.SizeNESW;
+            this.rightBottomPoint.ElementCursor = Cursors.SizeNWSE;
+            this.rightTopPoint.ElementCursor = Cursors.SizeNESW;
+        }
+        public void OnLeftTopPointTraction(TractionPoint element, float x, float y)
+        {
+            leftBottomPoint.X = x;
+            rightTopPoint.Y = y;
+            if (this.Height < 0)
+            {
+                FlipVertical();
+            }
+            if (this.Width < 0)
+            {
+                FlipHorizontal();
+            }
+            OnElementChange(this);
+        }
+        public void OnLeftBottomPointTraction(TractionPoint element, float x, float y)
+        {
+            leftTopPoint.X = x;
+            rightBottomPoint.Y = y;
+            if (this.Height<0)
+            {
+                FlipVertical();
+            }
+            if (this.Width<0)
+            {
+                FlipHorizontal();
+            }
+            OnElementChange(this);
+        }
+        public void OnRightTopPointTraction(TractionPoint element, float x, float y)
+        {
+            leftTopPoint.Y = y;
+            rightBottomPoint.X = x;
+            if (this.Width<0)
+            {
+                FlipHorizontal();
+            }
+            if (this.Height<0)
+            {
+                FlipVertical();
+            }
+            OnElementChange(this);
+        }
+        public void OnRightBottomPointTraction(TractionPoint element, float x, float y)
+        {
+            leftBottomPoint.Y = y;
+            rightTopPoint.X = x;
+            if (this.Width < 0)
+            {
+                FlipHorizontal();
+            }
+            if (this.Height < 0)
+            {
+                FlipVertical();
+            }
+            OnElementChange(this);
+        }
+        public override void BeSelect(bool b)
+        {
+            this.rightBottomPoint.Visible = b;
+            this.rightTopPoint.Visible = b;
+            this.leftBottomPoint.Visible = b;
+            this.leftTopPoint.Visible = b;
+        }
+        public override void OnElementChange(Element element)
+        {
+            System.Console.WriteLine("leftTop:" + leftTopPoint.X + " " + leftTopPoint.Y);
+            System.Console.WriteLine("leftBottom:" + leftBottomPoint.X + " " + leftBottomPoint.Y);
+            System.Console.WriteLine("rightTop:" + rightTopPoint.X + " " + rightTopPoint.Y);
+            System.Console.WriteLine("rightBottom:" + rightBottomPoint.X + " " + rightBottomPoint.Y);
+        }
+
+        public override void Draw(Graphics g, Pen p)
+        {
+            PointF loca = Coordinate.CoordinateTransport(this.Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
+            g.DrawRectangle(p, loca.X, loca.Y, this.Width * ParentCoordinate.Scale, this.Height * ParentCoordinate.Scale);
+            g.DrawString(this.info, RectangleElement.DefaultFont, Brushes.Blue, loca.X + 10, loca.Y + 10);
+            if (this.Selected)
+            {
+                this.leftBottomPoint.Draw(g, p);
+                this.leftTopPoint.Draw(g, p);
+                this.rightBottomPoint.Draw(g, p);
+                this.rightTopPoint.Draw(g, p);
+            }
+        }
+        public override bool IsIn(float x, float y)
+        {
+            return (x < (X + Width) && x > X && Math.Abs(y - Y) < 6 / ParentCoordinate.Scale)
+                || (x < (X + Width) && x > X && Math.Abs(y - (Y + Height)) < 6 / ParentCoordinate.Scale)
+                || (y > Y && y < (Y + Height) && Math.Abs(x - X) < 6 / ParentCoordinate.Scale)
+                || (y > Y && y < (Y + Height) && Math.Abs(x - (X + Width)) < 6 / ParentCoordinate.Scale);
+        }
+        public override void Move(float x, float y)
+        {
+            float h = this.Height;
+            float w=this.Width;
+            this.X = x;
+            this.Y = y;
+            this.Width = w;
+            this.Height = h;
+        }
+        public override void Move(PointF p)
+        {
+            this.Move(p.X, p.Y);
+        }
+        public override bool AddKeyPoint(PointF point)
+        {
+            if (!this.IsComplete)
+            {
+                switch (PointCount)
+                {
+                    case 0:
+                        this.Location = point;
+                        PointCount++;
+                        break;
+                    case 1:
+                        PointCount++;
+                        break;
+                    default:
+                        break;
+                }
+                if (PointCount == RectElement.PointAmount)
+                {
+                    isComplete = true;
+                }
+            }
+            return isComplete;
+        }
+        public override void AdjustNextKeyPoint(PointF point)
+        {
+            switch (PointCount)
+            {
+                case 1:
+                    //this.Width = point.X - this.X;
+                    //this.Height = point.Y - this.Y;
+                    this.keyPoint2.tractionPoint.Traction(point);
+                    break;
+            }
+        }
+    }
 
     public class PolygonElement:KeyPointElement
     {
-        public new static int KeyPointAmount = 0;
-        public int PolygonKeyPointAmount = -1;
-
         private KeyPoint tmpPoint;//绘图时的临时关键点
-
 
         public override float X
         {
@@ -305,7 +615,7 @@ namespace LvControl.ImageView.Elements
                     return true;
                 }
             }
-            if(Geometry.IsPointOnLine(p,keyPointList.Last().Location,keyPointList.First().Location,6f))
+            if(keyPointList.Count>2&&  Geometry.IsPointOnLine(p,keyPointList.Last().Location,keyPointList.First().Location,6f))
             {
                 return true;
             }
@@ -351,206 +661,7 @@ namespace LvControl.ImageView.Elements
              }
         }
     }
-    /// <summary>
-    /// 矩形元素
-    /// </summary>
-    [Serializable()]
-    public class Rectangle : MainElement
-    {
-        public static Font DefaultFont = new Font("微软雅黑", 12f, FontStyle.Bold);
-        public static Cursor ElementDefaultCursor = Cursors.SizeAll;
-        public const float RECTANGLE_DEFAULT_Z = 2f;
-        public new static int PointAmount = 2;
-        public new float X { get { return base.X; } set { base.X = value; OnElementChange(null); } }
-        public new float Y { get { return base.Y; } set { base.Y = value; OnElementChange(null); } }
 
-        public new float Width { get { return base.Width; } set { base.Width = value; OnElementChange(null); } }
-        public new float Height { get { return base.Height; } set { base.Height = value; OnElementChange(null); } }
-
-        public new Coordinate ParentCoordinate 
-        { 
-            get 
-            {
-                return base.ParentCoordinate;
-            }
-            set
-            {
-                base.ParentCoordinate = value;
-                leftTopPoint.ParentCoordinate = value;
-                leftBottomPoint.ParentCoordinate = value;
-                rightBottomPoint.ParentCoordinate = value;
-                rightTopPoint.ParentCoordinate = value;
-            } 
-        }
-
-        public TractionPoint leftTopPoint,leftBottomPoint,rightTopPoint,rightBottomPoint;
-
-        public Rectangle()
-            : this(0f, 0f, 1f, 1f)
-        {
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        public Rectangle(float x, float y, float width, float height):base()
-        {
-            this.ElementCursor = Rectangle.ElementDefaultCursor;
-            this.leftTopPoint = new TractionPoint(this);
-            this.leftBottomPoint = new TractionPoint(this);
-            this.rightTopPoint = new TractionPoint(this);
-            this.rightBottomPoint = new TractionPoint(this);
-
-            this.leftTopPoint.ElementCursor = Cursors.SizeAll;
-            this.leftBottomPoint.ElementCursor = Cursors.SizeNESW;
-            this.rightBottomPoint.ElementCursor = Cursors.SizeNWSE;
-            this.rightTopPoint.ElementCursor = Cursors.SizeNESW;
-
-            this.X = x;
-            Y = y;
-            Z = RECTANGLE_DEFAULT_Z;
-            this.Width = width;
-            this.Height = height;
-
-            this.leftTopPoint.OnTractionEventHandler += OnLeftTopPointTraction;
-            this.leftBottomPoint.OnTractionEventHandler += OnLeftBottomPointTraction;
-            this.rightTopPoint.OnTractionEventHandler += OnRightTopPointTraction;
-            this.rightBottomPoint.OnTractionEventHandler += OnRightBottomPointTraction;
-            Visible = true;
-            ParentElement = null;
-        }
-        public override void OnElementChange(Element element)
-        {
-            this.leftTopPoint.X = X;
-            this.leftTopPoint.Y = Y;
-            this.leftBottomPoint.X = X;
-            this.leftBottomPoint.Y = Y + Height;
-            this.rightTopPoint.X = X + Width;
-            this.rightTopPoint.Y = Y;
-            this.rightBottomPoint.X = X + Width;
-            this.rightBottomPoint.Y = Y + Height;
-        }
-
-        public override void Draw(Graphics g, Pen p)
-        {
-            PointF loca = Coordinate.CoordinateTransport(this.Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
-            g.DrawRectangle(p, loca.X, loca.Y, this.Width * ParentCoordinate.Scale, this.Height * ParentCoordinate.Scale);
-            g.DrawString(this.info, Rectangle.DefaultFont, Brushes.Blue, loca.X+10 , loca.Y+10);
-            if (this.Selected)
-            {
-                this.leftBottomPoint.Draw(g, p);
-                this.leftTopPoint.Draw(g, p);
-                this.rightBottomPoint.Draw(g, p);
-                this.rightTopPoint.Draw(g, p);
-            }
-        }
-
-        /// <summary>
-        /// 基类 的Selected属性被设置时触发
-        /// </summary>
-        /// <param name="b"></param>
-        public override void BeSelect(bool b)
-        {
-            this.rightBottomPoint.Visible = b;
-            this.rightTopPoint.Visible = b;
-            this.leftBottomPoint.Visible = b;
-            this.leftTopPoint.Visible = b;
-        }
-        public void OnLeftTopPointTraction(TractionPoint element, float x, float y)
-        {
-            this.X = x;
-            this.Y = y;
-        }
-        public void OnLeftBottomPointTraction(TractionPoint element, float x, float y)
-        {
-            float right = this.X + this.Width;
-            this.X = x;
-            this.Width = right - this.X;
-            this.Height = y - this.Y;
-            if (this.Width <= 0 || this.Height <= 0)
-            {
-                leftBottomPoint.MoveBack();
-            }
-        }
-        public void OnRightTopPointTraction(TractionPoint element, float x, float y)
-        {
-            float bottom = this.Y + this.Height;
-            this.Width = x - this.X;
-            this.Y = y;
-            this.Height = bottom - this.Y;
-            if (this.Width <= 0 || this.Height <= 0)
-            {
-                rightTopPoint.MoveBack();
-            }
-        }
-        public void OnRightBottomPointTraction(TractionPoint element, float x, float y)
-        {
-            this.Width = x - this.X;
-            this.Height = y - this.Y;
-            if (this.Width <= 0 || this.Height <= 0)
-            {
-                rightBottomPoint.MoveBack();
-            }
-        }
-        public override bool AddKeyPoint(PointF point)
-        {
-            if(!this.IsComplete)
-            {
-                switch(PointCount)
-                {
-                    case 0:
-                        this.Location = point;
-                        PointCount++;
-                        break;
-                    case 1:
-                        this.Width = point.X - this.X;
-                        this.Height = point.Y - this.Y;
-                        PointCount++;
-                        break;
-                    default:
-                        break;
-                }
-                if(PointCount==Rectangle.PointAmount)
-                {
-                    isComplete = true;
-                }
-            }
-            return isComplete;
-        }
-        public override void AdjustNextKeyPoint(PointF point)
-        {
-            switch (PointCount)
-            {
-                case 1:
-                    this.Width = point.X - this.X;
-                    this.Height = point.Y - this.Y;
-                    break;
-            }
-        }
-        public override bool IsIn(float x, float y)
-        {
-            return (x < (X + Width) && x > X && Math.Abs(y - Y) < 6 / ParentCoordinate.Scale)
-                || (x < (X + Width) && x > X && Math.Abs(y - (Y + Height)) < 6 / ParentCoordinate.Scale)
-                || (y > Y && y < (Y + Height) && Math.Abs(x - X) < 6 / ParentCoordinate.Scale)
-                || (y > Y && y < (Y + Height) && Math.Abs(x - (X + Width)) < 6 / ParentCoordinate.Scale);
-        }
-
-        public override void Move(float x, float y)
-        {
-            base.Move(x, y);
-            OnElementChange(this);
-        }
-        public override void Move(PointF p)
-        {
-            base.Move(p);
-            OnElementChange(this);
-        }
-
-    }
     public class Line : MainElement
     {
         public static Cursor ElementDefaultCursor = Cursors.SizeAll;
@@ -583,7 +694,7 @@ namespace LvControl.ImageView.Elements
 
         public Line(float x1, float y1, float x2, float y2):base()
         {
-            this.ElementCursor = Rectangle.ElementDefaultCursor;
+            this.ElementCursor = RectangleElement.ElementDefaultCursor;
             for (int i = 0; i < Line.PointAmount; i++)
             {
                 tractionPointList.Add( new TractionPoint(this));
@@ -750,7 +861,7 @@ namespace LvControl.ImageView.Elements
         /// <param name="y2"></param>
         public EllipseElement(float x1, float y1, float x2, float y2):base()
         {
-            this.ElementCursor = Rectangle.ElementDefaultCursor;
+            this.ElementCursor = RectangleElement.ElementDefaultCursor;
             for (int i = 0; i < Line.PointAmount; i++)
             {
                 tractionPointList.Add(new TractionPoint(this));
