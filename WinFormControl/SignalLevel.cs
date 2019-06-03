@@ -26,28 +26,26 @@ namespace WinFormControl
             SizeF size = e.Graphics.MeasureString(Value.ToString("0.0"), Font);
             if (Value <= 10)
             {
-                e.Graphics.FillRectangle(Brushes.Black, 0f, 0f, this.Width / 4f, this.Height);
+                e.Graphics.FillRectangle(Brushes.Black, 0f, 0f, Math.Max(5f, this.Width*(float)Value / 100f), this.Height);
                 e.Graphics.DrawString(Value.ToString("0.0"), Font, Brushes.White, (this.Width - size.Width) / 2f, (this.Height - size.Height) / 2f);
             }
             else if (Value <= 40)
             {
-                e.Graphics.FillRectangle(Brushes.Blue, 0f, 0f, this.Width / 2f, this.Height);
+                e.Graphics.FillRectangle(Brushes.Blue, 0f, 0f, this.Width* (float)Value/ 100f, this.Height);
                 e.Graphics.DrawString(Value.ToString("0.0"), Font, Brushes.White, (this.Width - size.Width) / 2f, (this.Height - size.Height) / 2f);
             }
             else if (Value <= 90)
             {
-                e.Graphics.FillRectangle(Brushes.Lime, 0f, 0f, this.Width*3 / 4f, this.Height);
+                e.Graphics.FillRectangle(Brushes.Lime, 0f, 0f, this.Width*(float)Value /100f, this.Height);
                 e.Graphics.DrawString(Value.ToString("0.0"), Font, Brushes.Black, (this.Width - size.Width) / 2f, (this.Height - size.Height) / 2f);
             }
             else
             {
-                e.Graphics.FillRectangle(Brushes.Red, 0f, 0f, this.Width , this.Height);
+                e.Graphics.FillRectangle(Brushes.Red, 0f, 0f, Math.Min(this.Width, this.Width*(float)Value/100f) , this.Height);
                 e.Graphics.DrawString(Value.ToString("0.0"), Font, Brushes.Black, (this.Width - size.Width) / 2f, (this.Height - size.Height) / 2f);
             }
 
             e.Graphics.DrawRectangle(Pens.Black, 0f, 0f, this.Width-1, this.Height-1);
-            
-            
 
         }
     }
