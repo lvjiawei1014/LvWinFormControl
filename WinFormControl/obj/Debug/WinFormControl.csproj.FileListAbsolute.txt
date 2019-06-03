@@ -22,7 +22,8 @@ E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.LvToo
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.LvToolBar.resources
 E:\GitHub\LvWinFormControl\WinFormControl\bin\Debug\WinFormControl.dll
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.dll
-E:\Project\GitHub\LvWinFormControl\WinFormControl\bin\Debug\WinFormControl.exe
-E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.exe
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\LvControl.ImageView.LvImageView.resources
-E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csprojResolveAssemblyReference.cache
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csproj.CoreCompileInputs.cache
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.SignalLevel.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\bin\Debug\WinFormControl.dll
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.dll

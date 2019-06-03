@@ -220,11 +220,6 @@ namespace LvControl.ImageView
         }
         public void AddElement(Element element)
         {
-            if (element is LvControl.ImageView.Elements.RectangleElement)
-            {
-                AddRectangle(element as LvControl.ImageView.Elements.RectangleElement);
-                return;
-            }
             if (element is RectElement)
             {
                 AddRectangle(element as RectElement);
@@ -263,18 +258,6 @@ namespace LvControl.ImageView
             {
                 baseElements.Add(polygon.keyPointList[i].tractionPoint);
             }
-            baseElements.Sort();
-        }
-        public void AddRectangle(LvControl.ImageView.Elements.RectangleElement rect)
-        {
-            rect.ParentCoordinate = imageElement.coordinate;
-            rect.ParentElement = imageElement;
-            elements.Add(rect);
-            baseElements.Add(rect);
-            baseElements.Add(rect.leftTopPoint);
-            baseElements.Add(rect.leftBottomPoint);
-            baseElements.Add(rect.rightTopPoint);
-            baseElements.Add(rect.rightBottomPoint);
             baseElements.Sort();
         }
         public void AddRectangle(RectElement rect)

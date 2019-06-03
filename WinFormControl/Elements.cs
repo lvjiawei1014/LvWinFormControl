@@ -422,7 +422,7 @@ namespace LvControl.ImageView.Elements
         {
             PointF loca = Coordinate.CoordinateTransport(this.Location, this.ParentCoordinate, Coordinate.BaseCoornidate);
             g.DrawRectangle(p, loca.X, loca.Y, this.Width * ParentCoordinate.Scale, this.Height * ParentCoordinate.Scale);
-            g.DrawString(this.info, RectangleElement.DefaultFont, Brushes.Blue, loca.X + 10, loca.Y + 10);
+            g.DrawString(this.info, RectElement.DefaultFont, Brushes.Blue, loca.X + 10, loca.Y + 10);
             if (this.Selected)
             {
                 this.leftBottomPoint.Draw(g, p);
@@ -694,7 +694,7 @@ namespace LvControl.ImageView.Elements
 
         public Line(float x1, float y1, float x2, float y2):base()
         {
-            this.ElementCursor = RectangleElement.ElementDefaultCursor;
+            this.ElementCursor = RectElement.ElementDefaultCursor;
             for (int i = 0; i < Line.PointAmount; i++)
             {
                 tractionPointList.Add( new TractionPoint(this));
@@ -861,7 +861,7 @@ namespace LvControl.ImageView.Elements
         /// <param name="y2"></param>
         public EllipseElement(float x1, float y1, float x2, float y2):base()
         {
-            this.ElementCursor = RectangleElement.ElementDefaultCursor;
+            this.ElementCursor = RectElement.ElementDefaultCursor;
             for (int i = 0; i < Line.PointAmount; i++)
             {
                 tractionPointList.Add(new TractionPoint(this));

@@ -3,14 +3,14 @@
     partial class Form1
     {
         /// <summary>
-        /// 必需的设计器变量。
+        /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary>
-        /// 清理所有正在使用的资源。
+        /// Clean up any resources being used.
         /// </summary>
-        /// <param name="disposing">如果应释放托管资源，为 true；否则为 false。</param>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -20,168 +20,57 @@
             base.Dispose(disposing);
         }
 
-        #region Windows 窗体设计器生成的代码
+        #region Windows Form Designer generated code
 
         /// <summary>
-        /// 设计器支持所需的方法 - 不要
-        /// 使用代码编辑器修改此方法的内容。
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.lvImageView1 = new LvControl.ImageView.LvImageView();
-            this.btnPolygon = new System.Windows.Forms.Button();
-            this.btnDelete = new System.Windows.Forms.Button();
-            this.btnLine = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.btnEdit = new System.Windows.Forms.Button();
-            this.btnNormal = new System.Windows.Forms.Button();
-            this.btnDrawRect = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.lvImageView1.SuspendLayout();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.signalLevel1 = new WinFormControl.SignalLevel();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
-            // lvImageView1
+            // numericUpDown1
             // 
-            this.lvImageView1.AutoFit = false;
-            this.lvImageView1.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.lvImageView1.Controls.Add(this.btnPolygon);
-            this.lvImageView1.Controls.Add(this.btnDelete);
-            this.lvImageView1.Controls.Add(this.btnLine);
-            this.lvImageView1.Controls.Add(this.textBox1);
-            this.lvImageView1.Controls.Add(this.btnEdit);
-            this.lvImageView1.Controls.Add(this.btnNormal);
-            this.lvImageView1.Controls.Add(this.btnDrawRect);
-            this.lvImageView1.Controls.Add(this.button2);
-            this.lvImageView1.Controls.Add(this.button1);
-            this.lvImageView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lvImageView1.DrawingElementType = LvControl.ImageView.ElementType.Image;
-            this.lvImageView1.Image = null;
-            this.lvImageView1.ImageLocation = ((System.Drawing.PointF)(resources.GetObject("lvImageView1.ImageLocation")));
-            this.lvImageView1.ImageScale = 1F;
-            this.lvImageView1.ImageViewState = LvControl.ImageView.ImageViewState.Normal;
-            this.lvImageView1.Location = new System.Drawing.Point(0, 0);
-            this.lvImageView1.MouseState = LvControl.ImageView.MouseState.Idle;
-            this.lvImageView1.Name = "lvImageView1";
-            this.lvImageView1.Size = new System.Drawing.Size(1264, 681);
-            this.lvImageView1.TabIndex = 0;
-            this.lvImageView1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.lvImageView1_MouseMove);
+            this.numericUpDown1.Location = new System.Drawing.Point(91, 91);
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(120, 21);
+            this.numericUpDown1.TabIndex = 1;
+            this.numericUpDown1.ValueChanged += new System.EventHandler(this.NumericUpDown1_ValueChanged);
             // 
-            // btnPolygon
+            // signalLevel1
             // 
-            this.btnPolygon.Location = new System.Drawing.Point(12, 128);
-            this.btnPolygon.Name = "btnPolygon";
-            this.btnPolygon.Size = new System.Drawing.Size(75, 23);
-            this.btnPolygon.TabIndex = 9;
-            this.btnPolygon.Text = "画多边形";
-            this.btnPolygon.UseVisualStyleBackColor = true;
-            this.btnPolygon.Click += new System.EventHandler(this.btnPolygon_Click);
-            // 
-            // btnDelete
-            // 
-            this.btnDelete.Location = new System.Drawing.Point(12, 330);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(75, 23);
-            this.btnDelete.TabIndex = 8;
-            this.btnDelete.Text = "删除";
-            this.btnDelete.UseVisualStyleBackColor = true;
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
-            // 
-            // btnLine
-            // 
-            this.btnLine.Location = new System.Drawing.Point(12, 99);
-            this.btnLine.Name = "btnLine";
-            this.btnLine.Size = new System.Drawing.Size(75, 23);
-            this.btnLine.TabIndex = 7;
-            this.btnLine.Text = "画直线";
-            this.btnLine.UseVisualStyleBackColor = true;
-            this.btnLine.Click += new System.EventHandler(this.btnLine_Click);
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(12, 648);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(415, 21);
-            this.textBox1.TabIndex = 6;
-            // 
-            // btnEdit
-            // 
-            this.btnEdit.Location = new System.Drawing.Point(12, 270);
-            this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(75, 23);
-            this.btnEdit.TabIndex = 5;
-            this.btnEdit.Text = "编辑";
-            this.btnEdit.UseVisualStyleBackColor = true;
-            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
-            // 
-            // btnNormal
-            // 
-            this.btnNormal.Location = new System.Drawing.Point(12, 241);
-            this.btnNormal.Name = "btnNormal";
-            this.btnNormal.Size = new System.Drawing.Size(75, 23);
-            this.btnNormal.TabIndex = 4;
-            this.btnNormal.Text = "查看";
-            this.btnNormal.UseVisualStyleBackColor = true;
-            this.btnNormal.Click += new System.EventHandler(this.btnNormal_Click);
-            // 
-            // btnDrawRect
-            // 
-            this.btnDrawRect.Location = new System.Drawing.Point(12, 70);
-            this.btnDrawRect.Name = "btnDrawRect";
-            this.btnDrawRect.Size = new System.Drawing.Size(75, 23);
-            this.btnDrawRect.TabIndex = 3;
-            this.btnDrawRect.Text = "画矩形";
-            this.btnDrawRect.UseVisualStyleBackColor = true;
-            this.btnDrawRect.Click += new System.EventHandler(this.btnDrawRect_Click);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(12, 41);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
-            this.button2.TabIndex = 2;
-            this.button2.Text = "button2";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(12, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 1;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.signalLevel1.BackColor = System.Drawing.Color.Gray;
+            this.signalLevel1.Location = new System.Drawing.Point(91, 33);
+            this.signalLevel1.Name = "signalLevel1";
+            this.signalLevel1.Size = new System.Drawing.Size(80, 20);
+            this.signalLevel1.TabIndex = 0;
+            this.signalLevel1.Value = new decimal(new int[] {
+            91,
+            0,
+            0,
+            0});
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1264, 681);
-            this.Controls.Add(this.lvImageView1);
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.numericUpDown1);
+            this.Controls.Add(this.signalLevel1);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.lvImageView1.ResumeLayout(false);
-            this.lvImageView1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private LvControl.ImageView.LvImageView lvImageView1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button btnNormal;
-        private System.Windows.Forms.Button btnDrawRect;
-        private System.Windows.Forms.Button btnEdit;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Button btnLine;
-        private System.Windows.Forms.Button btnDelete;
-        private System.Windows.Forms.Button btnPolygon;
+        private SignalLevel signalLevel1;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
     }
 }
-
