@@ -1039,11 +1039,11 @@ namespace LvControl.ImageView.Elements
     [Serializable()]
     public class ImageElement : MainElement
     {
-        private Image image;
+        private Bitmap image;
 
         public int WindowWidth { get; set; }
         public int WindowHeight { get; set; }
-        public Image Image 
+        public Bitmap Image 
         { 
             get { return image; }
 

@@ -36,7 +36,7 @@ namespace LvControl.ImageView
 
         #endregion
         #region 属性
-        public Image Image {
+        public Bitmap Image {
             get
             {
                 return curItem.imageElement.Image;
@@ -74,7 +74,6 @@ namespace LvControl.ImageView
             MouseState = MouseState.Idle;
 
             InitializeComponent();
-            this.curItem.imageElement = new ImageElement();
 
             this.MouseWheel += LvImageView_MouseWheel;
             this.ElementCreateEventHandler += this.OnElementCreate;
@@ -133,6 +132,17 @@ namespace LvControl.ImageView
         {
             this.Items.Add(item);
         }
+        public DisplayItem GetDisplayItem(string name)
+        {
+            for(int i = 0; i < Items.Count; i++)
+            {
+                if (Items[i].Name == name)
+                {
+                    return Items[i];
+                }
+            }
+            return null;
+        }
         public void SwitchDisplayItem(string name)
         {
             for (int i = 0; i < Items.Count; i++)
@@ -143,13 +153,16 @@ namespace LvControl.ImageView
                     break;
                 }
             }
+            this.Refresh();
         }
         public void SwitchDisplayItem(int index)
         {
             if (index < Items.Count && index >= 0)
             {
                 this.curItem = Items[index];
+                this.Refresh();
             }
+            
         }
         public void DeleteDisplayItem(string name)
         {
@@ -163,7 +176,7 @@ namespace LvControl.ImageView
             }
         }
 
-        private void OnImageSet(ref Image image)
+        private void OnImageSet(ref Bitmap image)
         {
             if(image!=null)
             {
@@ -583,9 +596,11 @@ namespace LvControl.ImageView
         public Point operationStartControlPoint;
         public PointF operationStartImagePoint;
         public PointF operatedElementStartPoint;//被操作的element的初始位置
+        public Bitmap Image { get { return imageElement.Image; }set { imageElement.Image = value; } }
         public DisplayItem(string name)
         {
             this.Name = name;
+            this.imageElement = new ImageElement();
         }
     }
 
