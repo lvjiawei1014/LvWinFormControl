@@ -1,0 +1,10 @@
+E:\GitHub\LvWinFormControl\LvWinFormControlDemo\bin\Debug\LvWinFormControlDemo.exe
+E:\GitHub\LvWinFormControl\LvWinFormControlDemo\bin\Debug\LvWinFormControlDemo.pdb
+E:\GitHub\LvWinFormControl\LvWinFormControlDemo\bin\Debug\WinFormControl.dll
+E:\GitHub\LvWinFormControl\LvWinFormControlDemo\bin\Debug\WinFormControl.pdb
+E:\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.csprojResolveAssemblyReference.cache
+E:\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.Form1.resources
+E:\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.Properties.Resources.resources
+E:\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.csproj.GenerateResource.Cache
+E:\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.exe
+E:\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.pdb
