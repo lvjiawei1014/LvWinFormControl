@@ -36,6 +36,7 @@ namespace LvControl.ImageView
 
         #endregion
         #region 属性
+        public bool ContinuousDraw { get; set; }
         public Bitmap Image {
             get
             {
@@ -109,7 +110,7 @@ namespace LvControl.ImageView
                         element.Draw(g, p);
                     } 
                 }
-                if (drawingElement != null && drawingElement.Visible)
+                if (drawingElement != null && drawingElement.Visible && this.ImageViewState==ImageViewState.Draw)
                 {
                     drawingElement.Draw(g, p);
                 }
@@ -153,6 +154,8 @@ namespace LvControl.ImageView
                     break;
                 }
             }
+            this.MouseState = MouseState.Idle;
+            this.ImageViewState = ImageViewState.Normal;
             this.Refresh();
         }
         public void SwitchDisplayItem(int index)
@@ -160,6 +163,8 @@ namespace LvControl.ImageView
             if (index < Items.Count && index >= 0)
             {
                 this.curItem = Items[index];
+                this.MouseState = MouseState.Idle;
+                this.ImageViewState = ImageViewState.Normal;
                 this.Refresh();
             }
             
@@ -175,7 +180,6 @@ namespace LvControl.ImageView
                 }
             }
         }
-
         private void OnImageSet(ref Bitmap image)
         {
             if(image!=null)
@@ -192,9 +196,6 @@ namespace LvControl.ImageView
                 this.Refresh();
             }
         }
-
-
-
         public void ChangeMode(ImageViewState mode)
         {
             if (mode != this.ImageViewState)
@@ -248,8 +249,11 @@ namespace LvControl.ImageView
             {
                 AddPolypon(element as PolygonElement);
             }
+            if(element is EllipseElement)
+            {
+                AddEllipse(element as EllipseElement);
+            }
         }
-
         public void AddLine(Line line)
         {
             line.ParentCoordinate = imageElement.coordinate;
@@ -260,7 +264,6 @@ namespace LvControl.ImageView
             baseElements.Add(line.TractionPoints[1]);
             baseElements.Sort();
         }
-
         public void AddPolypon(PolygonElement polygon)
         {
             polygon.ParentCoordinate = imageElement.coordinate;
@@ -283,6 +286,18 @@ namespace LvControl.ImageView
             baseElements.Add(rect.leftBottomPoint);
             baseElements.Add(rect.rightTopPoint);
             baseElements.Add(rect.rightBottomPoint);
+            baseElements.Sort();
+        }
+        public void AddEllipse(EllipseElement ellipse)
+        {
+            ellipse.ParentCoordinate = imageElement.coordinate;
+            ellipse.ParentElement = imageElement;
+            elements.Add(ellipse);
+            baseElements.Add(ellipse);
+            baseElements.Add(ellipse.leftTopPoint);
+            baseElements.Add(ellipse.leftBottomPoint);
+            baseElements.Add(ellipse.rightTopPoint);
+            baseElements.Add(ellipse.rightBottomPoint);
             baseElements.Sort();
         }
         public Element GetTargetElement(float x, float y)
@@ -357,6 +372,9 @@ namespace LvControl.ImageView
                 case ElementType.Polygon:
                     this.drawingElement=new PolygonElement();
                     break;
+                case ElementType.Ellipse:
+                    this.drawingElement = new EllipseElement();
+                    break;
                 default:
                     break;
             }
@@ -423,7 +441,15 @@ namespace LvControl.ImageView
                     {
                         MouseState = MouseState.Idle;
                         this.ElementCreateEventHandler(drawingElement);//触发事件
-                        CreateElement(this.DrawingElementType);
+                        if (this.ContinuousDraw)
+                        {
+                            CreateElement(this.DrawingElementType);
+                        }
+                        else
+                        {
+                            drawingElement = null;
+                            this.ImageViewState = ImageViewState.Normal;
+                        }
                     }
                 }else if(e.Button==MouseButtons.Right)
                 {
@@ -434,7 +460,15 @@ namespace LvControl.ImageView
                         {
                             MouseState = MouseState.Idle;
                             this.ElementCreateEventHandler(drawingElement);
-                            CreateElement(this.DrawingElementType);
+                            if (this.ContinuousDraw)
+                            {
+                                CreateElement(this.DrawingElementType);
+                            }
+                            else
+                            {
+                                drawingElement = null;
+                                this.ImageViewState = ImageViewState.Normal;
+                            }
                         }
                         else
                         {
@@ -602,6 +636,100 @@ namespace LvControl.ImageView
             this.Name = name;
             this.imageElement = new ImageElement();
         }
+        public void AddElement(Element element)
+        {
+            if (element is RectElement)
+            {
+                AddRectangle(element as RectElement);
+                return;
+            }
+            if (element is Line)
+            {
+                AddLine(element as Line);
+                return;
+
+            }
+            if (element is PolygonElement)
+            {
+                AddPolypon(element as PolygonElement);
+            }
+            if (element is EllipseElement)
+            {
+                AddEllipse(element as EllipseElement);
+            }
+        }
+        public void AddLine(Line line)
+        {
+            line.ParentCoordinate = imageElement.coordinate;
+            line.ParentElement = imageElement;
+            elements.Add(line);
+            baseElements.Add(line);
+            baseElements.Add(line.TractionPoints[0]);
+            baseElements.Add(line.TractionPoints[1]);
+            baseElements.Sort();
+        }
+        public void AddPolypon(PolygonElement polygon)
+        {
+            polygon.ParentCoordinate = imageElement.coordinate;
+            polygon.ParentElement = imageElement;
+            elements.Add(polygon);
+            baseElements.Add(polygon);
+            for (int i = 0; i < polygon.keyPointList.Count; i++)
+            {
+                baseElements.Add(polygon.keyPointList[i].tractionPoint);
+            }
+            baseElements.Sort();
+        }
+        public void AddRectangle(RectElement rect)
+        {
+            rect.ParentCoordinate = imageElement.coordinate;
+            rect.ParentElement = imageElement;
+            elements.Add(rect);
+            baseElements.Add(rect);
+            baseElements.Add(rect.leftTopPoint);
+            baseElements.Add(rect.leftBottomPoint);
+            baseElements.Add(rect.rightTopPoint);
+            baseElements.Add(rect.rightBottomPoint);
+            baseElements.Sort();
+        }
+        public void AddEllipse(EllipseElement ellipse)
+        {
+            ellipse.ParentCoordinate = imageElement.coordinate;
+            ellipse.ParentElement = imageElement;
+            elements.Add(ellipse);
+            baseElements.Add(ellipse);
+            baseElements.Add(ellipse.leftTopPoint);
+            baseElements.Add(ellipse.leftBottomPoint);
+            baseElements.Add(ellipse.rightTopPoint);
+            baseElements.Add(ellipse.rightBottomPoint);
+            baseElements.Sort();
+        }
+        public void DeleteElement(Element element)
+        {
+            for (int i = 0; i < elements.Count; i++)
+            {
+                if (element == elements[i])
+                {
+                    elements.RemoveAt(i);
+                }
+            }
+
+            for (int i = 0; i < baseElements.Count; i++)
+            {
+                if (element == baseElements[i].ParentElement)
+                {
+                    baseElements.RemoveAt(i);
+                }
+            }
+        }
+
+        public void DeleteAllElement()
+        {
+            elements.Clear();
+            baseElements.Clear();
+        }
+
+
     }
 
     public enum ImageViewState
@@ -624,6 +752,7 @@ namespace LvControl.ImageView
         Line=2,
         Rectangle=3,
         Polygon=4,
+        Ellipse=5,
     }
 
     
