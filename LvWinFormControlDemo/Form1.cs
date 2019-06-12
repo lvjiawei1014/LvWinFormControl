@@ -26,5 +26,10 @@ namespace LvWinFormControlDemo
             lvTab1.AddItem("2", "asdasd");
             lvTab1.SelectIndex(1);
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            lvValueBar1.Value = 80;
+        }
     }
 }
