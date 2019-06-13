@@ -30,3 +30,4 @@ E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.dll
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csprojResolveAssemblyReference.cache
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.Controls.LvTab.LvTab.resources
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csprojAssemblyReference.cache
+E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.Controls.LvValueBar.resources

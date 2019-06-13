@@ -31,6 +31,7 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
+            this.lvValueBar1 = new WinFormControl.Controls.LvValueBar();
             this.signalLevel1 = new WinFormControl.SignalLevel();
             this.lvTab1 = new WinFormControl.Controls.LvTab.LvTab();
             this.SuspendLayout();
@@ -61,6 +62,16 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // lvValueBar1
+            // 
+            this.lvValueBar1.Location = new System.Drawing.Point(108, 194);
+            this.lvValueBar1.MaxValue = 100F;
+            this.lvValueBar1.MinValue = 0F;
+            this.lvValueBar1.Name = "lvValueBar1";
+            this.lvValueBar1.Size = new System.Drawing.Size(293, 24);
+            this.lvValueBar1.TabIndex = 5;
+            this.lvValueBar1.Value = 50F;
+            // 
             // signalLevel1
             // 
             this.signalLevel1.Location = new System.Drawing.Point(243, 86);
@@ -88,6 +99,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(670, 274);
+            this.Controls.Add(this.lvValueBar1);
             this.Controls.Add(this.signalLevel1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.lvTab1);
@@ -95,6 +107,7 @@
             this.Controls.Add(this.textBox1);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -107,6 +120,7 @@
         private WinFormControl.Controls.LvTab.LvTab lvTab1;
         private System.Windows.Forms.Button button1;
         private WinFormControl.SignalLevel signalLevel1;
+        private WinFormControl.Controls.LvValueBar lvValueBar1;
 
     }
 }
