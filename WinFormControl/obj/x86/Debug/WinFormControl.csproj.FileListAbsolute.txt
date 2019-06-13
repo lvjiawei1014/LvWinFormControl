@@ -1,0 +1,12 @@
+E:\Project\GitHub\LvWinFormControl\WinFormControl\bin\x86\Debug\WinFormControl.dll
+E:\Project\GitHub\LvWinFormControl\WinFormControl\bin\x86\Debug\WinFormControl.pdb
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\x86\Debug\WinFormControl.csprojAssemblyReference.cache
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\x86\Debug\LvControl.ImageView.LvImageView.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\x86\Debug\WinFormControl.Controls.LvTab.LvTab.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\x86\Debug\WinFormControl.LvToolBar.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\x86\Debug\WinFormControl.Properties.Resources.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\x86\Debug\WinFormControl.SignalLevel.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\x86\Debug\WinFormControl.csproj.GenerateResource.cache
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\x86\Debug\WinFormControl.csproj.CoreCompileInputs.cache
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\x86\Debug\WinFormControl.dll
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\x86\Debug\WinFormControl.pdb

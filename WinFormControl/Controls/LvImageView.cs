@@ -232,6 +232,10 @@ namespace LvControl.ImageView
 
             this.Refresh();
         }
+        public void Zoom(float relative)
+        {
+            this.OnScale(new Point(this.Width / 2, this.Height / 2), this.ImageScale * relative);
+        }
         public void AddElement(Element element)
         {
             if (element is RectElement)

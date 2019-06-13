@@ -95,6 +95,17 @@ namespace WinFormControl.Controls.LvTab
             this.selectedIndex = index;
             this.OnTabItemSelectedHandler(index);
         }
+        public void SelectItem(string name)
+        {
+            for(int i = 0; i < Items.Count; i++)
+            {
+                if (Items[i].Name == name)
+                {
+                    this.selectedIndex = i;
+                    this.OnTabItemSelectedHandler(i);
+                }
+            }
+        }
 
         public void UpdateLayout()
         {

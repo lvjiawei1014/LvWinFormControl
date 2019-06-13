@@ -1,11 +1,11 @@
-E:\Project\GitHub\LvWinFormControl\WinFormControl\bin\Release\WinFormControl.exe
 E:\Project\GitHub\LvWinFormControl\WinFormControl\bin\Release\WinFormControl.pdb
-E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\WinFormControl.Form1.resources
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\LvControl.ImageView.LvImageView.resources
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\WinFormControl.LvToolBar.resources
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\WinFormControl.Properties.Resources.resources
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\WinFormControl.SignalLevel.resources
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\WinFormControl.csproj.GenerateResource.cache
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\WinFormControl.csproj.CoreCompileInputs.cache
-E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\WinFormControl.exe
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\WinFormControl.pdb
+E:\Project\GitHub\LvWinFormControl\WinFormControl\bin\Release\WinFormControl.dll
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\WinFormControl.Controls.LvTab.LvTab.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Release\WinFormControl.dll
