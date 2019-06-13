@@ -68,7 +68,7 @@
             this.lvValueBar1.MaxValue = 100F;
             this.lvValueBar1.MinValue = 0F;
             this.lvValueBar1.Name = "lvValueBar1";
-            this.lvValueBar1.Size = new System.Drawing.Size(293, 24);
+            this.lvValueBar1.Size = new System.Drawing.Size(464, 26);
             this.lvValueBar1.TabIndex = 5;
             this.lvValueBar1.Value = 50F;
             // 

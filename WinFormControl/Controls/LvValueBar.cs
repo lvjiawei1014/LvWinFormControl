@@ -11,6 +11,8 @@ namespace WinFormControl.Controls
 {
     public partial class LvValueBar : Panel
     {
+        public bool isDragging = false;
+
         public Color MainColor;
 
         public Color BaseColor;
@@ -24,9 +26,23 @@ namespace WinFormControl.Controls
         private float minValue = 0;
         public float MinValue { get { return minValue; } set { this.minValue = value; Refresh(); } }
         private float value = 50;
-        public float Value { get { return value; } set { this.value = value; Refresh(); } }
+        public float Value { get { return value; } set { this.value = value; 
+            Refresh();
+            if (this.ValueChangeHandler != null)
+            {
+                ValueChangeHandler(this,this.value);
+            }
+        
+        } }
+        public delegate void ValueChangeEvent(object sender,double value);
+        public ValueChangeEvent ValueChangeHandler;
+
+
         public LvValueBar()
         {
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            //SetStyle(ControlStyles.UserPaint, true);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
             InitializeComponent();
             this.BaseColor = Color.LightGray;
             this.MainColor = Color.BlueViolet;
@@ -54,6 +70,46 @@ namespace WinFormControl.Controls
             e.Graphics.DrawRectangle(borderPen, (this.Width - blockWidth * 1.2f) * (value / (maxValue - minValue)) + 0.6f * blockWidth - 0.5f * blockWidth, 0.1f * this.Height, blockWidth, blockHeight);
 
 
+        }
+
+        private void LvValueBar_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.X > (this.Width - blockWidth * 1.2f) * (value / (maxValue - minValue)) + 0.6f * blockWidth - 0.5f * blockWidth
+                && e.X < (this.Width - blockWidth * 1.2f) * (value / (maxValue - minValue)) + 0.6f * blockWidth + 0.5f * blockWidth
+                && e.Y>0.1*this.Height
+                && e.Y<0.9*this.Height)
+            {
+                this.isDragging = true;
+            }
+
+        }
+
+        private void LvValueBar_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                float value = ((e.X - this.blockWidth * 0.6f) / (this.Width - 1.2f * this.blockWidth))*(maxValue-minValue)+minValue;
+                this.value = Math.Min(maxValue, Math.Max(this.minValue,value));
+                this.Refresh();
+            }
+        }
+
+        private void LvValueBar_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                this.isDragging = false;
+                if (this.ValueChangeHandler != null)
+                {
+                    ValueChangeHandler(this,this.value);
+                }
+            }
+            
+        }
+
+        private void LvValueBar_Resize(object sender, EventArgs e)
+        {
+            this.Refresh();
         }
     }
 }

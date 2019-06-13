@@ -12,11 +12,9 @@ E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\bin\Debug\LvWinFormContr
 E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\bin\Debug\LvWinFormControlDemo.pdb
 E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\bin\Debug\WinFormControl.dll
 E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\bin\Debug\WinFormControl.pdb
-E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.csprojAssemblyReference.cache
 E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.Form1.resources
 E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.Properties.Resources.resources
 E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.csproj.GenerateResource.cache
-E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.csproj.CoreCompileInputs.cache
-E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.csproj.CopyComplete
 E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.exe
 E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.pdb
+E:\Project\GitHub\LvWinFormControl\LvWinFormControlDemo\obj\Debug\LvWinFormControlDemo.csprojResolveAssemblyReference.cache

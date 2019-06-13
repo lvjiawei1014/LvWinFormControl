@@ -33,6 +33,10 @@
             // LvValueBar
             // 
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.LvValueBar_Paint);
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.LvValueBar_MouseDown);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.LvValueBar_MouseMove);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.LvValueBar_MouseUp);
+            this.Resize += new System.EventHandler(this.LvValueBar_Resize);
             this.ResumeLayout(false);
 
         }

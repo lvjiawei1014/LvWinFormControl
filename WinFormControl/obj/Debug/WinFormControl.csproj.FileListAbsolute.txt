@@ -18,7 +18,6 @@ E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.cspro
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.LvToolBar.resources
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.LvToolBar.resources
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\LvControl.ImageView.LvImageView.resources
-E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csproj.CoreCompileInputs.cache
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.SignalLevel.resources
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\LvControl.ImageView.LvImageView.resources
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.SignalLevel.resources
@@ -29,5 +28,6 @@ E:\GitHub\LvWinFormControl\WinFormControl\bin\Debug\WinFormControl.dll
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.dll
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csprojResolveAssemblyReference.cache
 E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.Controls.LvTab.LvTab.resources
-E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csprojAssemblyReference.cache
 E:\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.Controls.LvValueBar.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.Controls.LvValueBar.resources
+E:\Project\GitHub\LvWinFormControl\WinFormControl\obj\Debug\WinFormControl.csprojResolveAssemblyReference.cache
